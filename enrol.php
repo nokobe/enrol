@@ -1,5 +1,5 @@
 <?php
-	$version = "version 2.0";
+	$version = "version 2.1";
 	$BASE = "./";
 	require_once $BASE.'config.inc';
 	require_once $BASE.'datetime.php';
@@ -95,7 +95,7 @@
 			log_event("saved $n bytes to $NOTICES_FILE");
 		}
 	} else if ($action == "Create New Session") {
-		echo "create new session!!!";
+//		echo "create new session!!!";
 		$day = $_POST["sess_day"];
 		$mon = $_POST["sess_month"];
 		$year = $_POST["sess_year"];
@@ -181,6 +181,17 @@
 		$session->active = "no";
 		$save_changes = 1;
 		log_event("closed session (ID = $USID) $session->whenstr at $session->location");
+	} else if ($action == "Reset Session ID") {
+		// count sessions
+		$sortthis = $xml->xpath('/sessions/session');
+		$total = count($sortthis);
+		if ($total == 0) {
+			$xml->nextID = 1;
+			$nextID = 1;
+			$save_changes = 1;
+		} else {
+			print "<h2>Error: attempt to reset SessionID when there are still sessions</h2>";
+		}
 	} else if ($action == "Edit" and $context == "editsession" ) {
 		$USID = $_POST["USID"];
 		$sessionarray = $xml->xpath("/sessions/session[usid=$USID]");
@@ -321,7 +332,11 @@
 	if ($name == "") {
 //		echo "<img border='0' alt='step 2 - select your classes' src='step2-full-gray.png'>";
 	} else {
-		echo "<img border='0' alt='step 2 - select your classes' src='step2-full.png'>";
+		if ($admin_mode) {
+			echo "<br />";
+		} else {
+			echo "<img border='0' alt='step 2 - select your classes' src='step2-full.png'>";
+		}
 	}
 	$header_counter = 0;
 	$in_use = array();
@@ -338,6 +353,7 @@
 
 	// NEED TO SORT THIS BY THE WHEN (timestamp) FIELD
 	$available = 0;
+	$total = count($sortthis);
 	foreach ($sortthis as $session) {
 		$USID = (int) $session->usid;
 
@@ -371,7 +387,7 @@
 		echo "<table border=\"1\">";
 		if ($header_counter % $default_page_break == 0) {
 			if ($admin_mode == 1) {
-				echo "<tr bgcolor='$tableheadercolor'><th colspan='2'>Admin Status</th>$SESS_TITLE<th>When</th><th>Location</th><th colspan=$max>Attendees</th></tr>\n";
+				echo "<tr bgcolor='$tableheadercolor'><th colspan='2'>Administration</th>$SESS_TITLE<th>When</th><th>Location</th><th colspan=$max>Attendees</th></tr>\n";
 			} else {
 				echo "<tr bgcolor='$tableheadercolor'><th></th>$SESS_TITLE<th>When</th><th>Location</th><th colspan=$max>Attendees</th></tr>\n";
 			}
@@ -387,11 +403,9 @@
 
 		if ($admin_mode == 1) {
 			if ($session->active == "yes") {
-				echo "<td bgcolor='green'>Active</td><td width='90' align='center'>";
-//				echo "<font color='green'>Active</font>";
+				echo "<td width='55' bgcolor='green'>Open</td><td width='95' align='center'>";
 			} else {
-				echo "<td bgcolor='red'>Closed</td><td width='90' align='center'>";
-//				echo "<font color='red'>Closed</font>";
+				echo "<td width='55' bgcolor='red'>Closed</td><td width='95' align='center'>";
 			}
 			echo "<form method=\"post\" action=\"$PHP_SELF\" style='padding-top: 5px; padding-bottom: 0px; margin-bottom: 0px'>";
 
@@ -399,13 +413,9 @@
 			echo "<input type=\"hidden\" name=\"USID\" value=\"$USID\">";
 			echo "<input type='hidden' name='Context' value='editsession'>";
 			if ($session->active == "yes") {
-//				<input type="image" src="butup.gif" alt="Submit button">
 				echo "<input type='image' src='icons/remove.png' name=\"Action\" value=\"Close\" alt='Close Session'>";
 				echo "&nbsp;";
 				echo "<input type='image' src='icons/edit.png' name=\"Action\" value=\"Edit\" alt='Edit Session'>";
-//				echo "<input type=\"submit\" name=\"Action\" value=\"Edit\">";
-//				echo "<input type=\"submit\" name=\"Action\" value=\"Close\">";
-//				echo "<table border='0'><tr><td><input type=\"submit\" name=\"Action\" value=\"Edit\"></td><td><input type=\"submit\" name=\"Action\" value=\"Close\"></td></tr></table>";
 			} else {
 				echo "<input type='image' src='icons/add.png' name=\"Action\" value=\"Open\" alt='Open Session'>";
 				echo "&nbsp;";
@@ -474,6 +484,19 @@
 	}
 	if ($available == 0) {
 		print "<br /><br />There are currently no sessions available\n";
+	}
+
+	if ($admin_mode and $total == 0 and $nextID > 1) {
+		echo "<br />";
+		echo "<br />";
+		echo "<table border='1' bgcolor='red' ><tr><td>";
+		echo "<form method=\"post\" action=\"$PHP_SELF\" style=' padding-bottom: 0px; margin-bottom: 0px'>";
+		echo "<input type=\"hidden\" name=\"Name\" value=\"$name\">";
+		echo "<input type='submit' name='Action' value='Reset Session ID'>";
+		echo "</form>";
+		echo "</td><td>";
+		echo "This will reset the SessionID back to 1";
+		echo "</td></tr></table>";
 	}
 
 	footer();
@@ -632,13 +655,14 @@ function print_header($title, $version) {
 } // end: print_header
 
 function footer() {
-	echo "
-<br />
-<br />
-<!--<div class='footer'>--- this site best viewed in Firefox ---</div>-->
-</body>
-</html>
-";
+	global $admin_mode;
+	echo "<br /><br />\n";
+	if ($admin_mode) {
+		echo "<div class='footer'>&bull; enrol software by mbates &bull; Icons by <a href='http://dryicons.com;'>DryIcons</a> &bull;</div>";
+	} else {
+		echo "<div class='footer'>&bull; enrol software by mbates &bull; </div>";
+	}
+	echo "</body></html>\n";
 } // end: footer
 
 function print_notices($file) {

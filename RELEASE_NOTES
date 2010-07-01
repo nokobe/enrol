@@ -1,0 +1,4 @@
+2.1	added ability to reset SessionID if total session count is zero.
+	slight tweaks to formatting to aid compatibility with IE8
+	add credits to footer (including credits for icons)
+	some minor tweaks
