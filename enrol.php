@@ -1,5 +1,5 @@
 <?php
-	$version = "version 2.1";
+	$version = "version 2.1.1";
 	$BASE = "./";
 	require_once $BASE.'config.inc';
 	require_once $BASE.'datetime.php';
@@ -246,6 +246,10 @@
 		$session->maxusers = $_POST["Maxusers"];
 		$save_changes = 1;
 		log_event("edited session (ID = $USID) $session->whenstr at $session->location");
+	} else if ($action == "Clear") {
+		// nothing need be done - has already been handled
+	} else if ($action == "Set") {
+		// nothing need be done...
 	} else {
 		if ($action != "") {
 			log_event("unknown action: $action in context: $context");
@@ -269,11 +273,13 @@
 	print_notices($NOTICES_FILE);
 
 	// print refresh button
-	echo "<br />";
-	echo "<form method=\"post\" action=\"$PHP_SELF\">";
-	echo "<input type=\"hidden\" name=\"Name\" value=\"$name\">";
-	echo "<input type='submit' value='Reload'>";
-	echo "</form>";
+	if (0) {
+		echo "<br />";
+		echo "<form method=\"post\" action=\"$PHP_SELF\">";
+		echo "<input type=\"hidden\" name=\"Name\" value=\"$name\">";
+		echo "<input type='submit' value='Reload'>";
+		echo "</form>";
+	}
 
 	// print name, with options to Set/Clear
 
@@ -413,16 +419,16 @@
 			echo "<input type=\"hidden\" name=\"USID\" value=\"$USID\">";
 			echo "<input type='hidden' name='Context' value='editsession'>";
 			if ($session->active == "yes") {
-				echo "<input type='image' src='icons/remove.png' name=\"Action\" value=\"Close\" alt='Close Session'>";
+				echo "<input type='image' src='icons/remove.png' name=\"Action\" value=\"Close\" alt='Close Session' title='Close Session'>";
 				echo "&nbsp;";
-				echo "<input type='image' src='icons/edit.png' name=\"Action\" value=\"Edit\" alt='Edit Session'>";
+				echo "<input type='image' src='icons/edit.png' name=\"Action\" value=\"Edit\" alt='Edit Session' title='Edit Session'>";
 			} else {
-				echo "<input type='image' src='icons/add.png' name=\"Action\" value=\"Open\" alt='Open Session'>";
+				echo "<input type='image' src='icons/add.png' name=\"Action\" value=\"Open\" alt='Open Session' title='Open Session'>";
 				echo "&nbsp;";
-				echo "<input type='image' src='icons/edit.png' name=\"Action\" value=\"Edit\" alt='Edit Session'>";
+				echo "<input type='image' src='icons/edit.png' name=\"Action\" value=\"Edit\" alt='Edit Session' title='Edit Session'>";
 				echo "&nbsp;";
 				echo "&nbsp;";
-				echo "<input type='image' src='icons/close.png' name='Action' value='Delete' alt='Delete Session'>";
+				echo "<input type='image' src='icons/close.png' name='Action' value='Delete' alt='Delete Session' title='Delete Session'>";
 			}
 			echo "</form>";
 			echo "</td>";
