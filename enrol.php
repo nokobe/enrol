@@ -1,5 +1,5 @@
 <?php
-	$version = "version 2.1.1";
+	$version = "version 2.2";
 	$BASE = "./";
 	require_once $BASE.'config.inc';
 	require_once $BASE.'datetime.php';
@@ -13,9 +13,12 @@
 	$nonesquarecolor = $config_colour_none;
 	$tableheadercolor = $config_colour_table_header;
 	$default_session_size = $config_default_session_size;
-	$default_page_break = $config_default_page_break;
+	$page_header_frequency = $config_page_header_frequency;
+	$print_weekly_title = $config_print_weekly_title;
 	$admin_user = $config_admin_user;
-
+	$show_session_id = $config_show_session_id;
+	$print_header_after_weekly_title = $config_print_header_after_weekly_title;
+	$max_enrolments_per_line = $config_max_enrolments_per_line;
 
 	$TITLE = $config_title;
 	$SESSIONS_FILE = $config_sessions_data_file;
@@ -293,8 +296,9 @@
 
 	// -- option to add new session
 	if ($admin_mode == 1) {
+		$sess_str = $show_session_id ? " (SessionID: $nextID)" : "";
 		print "<fieldset>
-			<legend>Add New Session (SessionID: $nextID)</legend>
+			<legend>Add New Session$sess_str</legend>
 			<form method=\"post\" action=\"$PHP_SELF\">
 			<input type=\"hidden\" name=\"Name\" value=\"$name\">
 			<input type=\"hidden\" name=\"Context\" value='sessions'>";
@@ -360,6 +364,8 @@
 	// NEED TO SORT THIS BY THE WHEN (timestamp) FIELD
 	$available = 0;
 	$total = count($sortthis);
+	$prev_week_number = -1;	// initial value must be invalid
+	$jump = 100;	// jump number for anchor points
 	foreach ($sortthis as $session) {
 		$USID = (int) $session->usid;
 
@@ -384,19 +390,49 @@
 
 		$SESS_TITLE = "";
 		$SESS_CELL = "";
-		if ($admin_mode) {
-			$SESS_TITLE = "<th>ID</td>";
-			$SESS_CELL = "<td width='26' align='center'>$USID</td>";
+		if ($admin_mode and $show_session_id) {
+			$SESS_TITLE = "<th class='border'>ID</td>";
+			$SESS_CELL = "<td class='border' width='26' align='center'>$USID</td>";
 		}
 //			echo "<td width='110' align='center' valign='center'>";
 
-		echo "<table border=\"1\">";
-		if ($header_counter % $default_page_break == 0) {
-			if ($admin_mode == 1) {
-				echo "<tr bgcolor='$tableheadercolor'><th colspan='2'>Administration</th>$SESS_TITLE<th>When</th><th>Location</th><th colspan=$max>Attendees</th></tr>\n";
-			} else {
-				echo "<tr bgcolor='$tableheadercolor'><th></th>$SESS_TITLE<th>When</th><th>Location</th><th colspan=$max>Attendees</th></tr>\n";
+		$jump ++;
+		echo "<a name='jump$jump'></a>";
+		echo "<table>";
+		if (($page_header_frequency > 0 || $header_counter == 0) and !$print_weekly_title) {
+			if ($header_counter % $page_header_frequency == 0) {
+				// print table header row
+				if ($admin_mode == 1) {
+					echo "<tr bgcolor='$tableheadercolor'><th class='border' colspan='2'>Administration</th>$SESS_TITLE<th class='border'>When</th><th class='border'>Location</th><th class='border' colspan=$max>Attendees</th></tr>\n";
+				} else {
+					echo "<tr bgcolor='$tableheadercolor'><th class='border'></th>$SESS_TITLE<th class='border'>When</th><th class='border'>Location</th><th class='border' colspan=$max>Attendees</th></tr>\n";
+				}
+				// end: print table header row
 			}
+		}
+		if ($print_weekly_title) {
+			// calculate if we need to print a weekly header:
+			// if this session is not in same week as prev session
+			// 	print header for this week
+			// prev = week number of this session
+			$this_week_number = date("W", (int)$session->when);
+
+			if ($this_week_number != $prev_week_number) {
+				$mondaystr = weeknumber2monday($this_week_number, (int)$session->when);
+				print "<div class='weeklyheader'>Sessions for week starting $mondaystr</div>\n";
+				// duplicating header code here.. (rather than using more complex logic to decide when we need to print it. Maybe should make this snippet a subroutine
+				if ($print_header_after_weekly_title) {
+					// print table header row
+					if ($admin_mode == 1) {
+						echo "<tr bgcolor='$tableheadercolor'><th class='border' colspan='2'>Administration</th>$SESS_TITLE<th class='border'>When</th><th class='border'>Location</th><th class='border' colspan=$max>Attendees</th></tr>\n";
+					} else {
+						echo "<tr bgcolor='$tableheadercolor'><th class='border'></th>$SESS_TITLE<th class='border'>When</th><th class='border'>Location</th><th class='border' colspan=$max>Attendees</th></tr>\n";
+					}
+					// end: print table header row
+				}
+			}
+			$prev_week_number = date("W", (int)$session->when);	// return value is a string, but we should be able to treat it as an integer.
+
 		}
 		$header_counter ++;
 
@@ -409,11 +445,11 @@
 
 		if ($admin_mode == 1) {
 			if ($session->active == "yes") {
-				echo "<td width='55' bgcolor='green'>Open</td><td width='95' align='center'>";
+				echo "<td class='border' width='55' bgcolor='green' align='center'>Open</td><td class='border' width='95' align='center'>";
 			} else {
-				echo "<td width='55' bgcolor='red'>Closed</td><td width='95' align='center'>";
+				echo "<td class='border' width='55' bgcolor='red' align='center'>Closed</td><td class='border' width='95' align='center'>";
 			}
-			echo "<form method=\"post\" action=\"$PHP_SELF\" style='padding-top: 5px; padding-bottom: 0px; margin-bottom: 0px'>";
+			echo "<form method=\"post\" action=\"$PHP_SELF#jump$jump\" style='padding-top: 5px; padding-bottom: 0px; margin-bottom: 0px'>";
 
 			echo "<input type=\"hidden\" name=\"Name\" value=\"$name\">";
 			echo "<input type=\"hidden\" name=\"USID\" value=\"$USID\">";
@@ -433,8 +469,8 @@
 			echo "</form>";
 			echo "</td>";
 		} else {
-			echo "<td width='130' align='center' valign='center'>";
-			echo "<form method=\"post\" action=\"$PHP_SELF\" style=' padding-bottom: 0px; margin-bottom: 0px'>";
+			echo "<td class='border' class='border' width='130' align='center' valign='center'>";
+			echo "<form method=\"post\" action=\"$PHP_SELF#jump$jump\" style=' padding-bottom: 0px; margin-bottom: 0px'>";
 			echo "<input type=\"hidden\" name=\"Name\" value=\"$name\">";
 			echo "<input type=\"hidden\" name=\"USID\" value=\"$USID\">";
 			if ($enrolled === FALSE) { // then not yet in list
@@ -456,38 +492,117 @@
 		if ($admin_mode) {
 			echo "$SESS_CELL";
 		}
-		echo "<td align='center' width='200'>";
+		echo "<td class='border' align='center' width='200'>";
 		echo $session->whenstr;
 //		echo $session->date . " at " . $session->time . "<br />\n";
 		echo "</td>";
-		echo "<td align='center' width='150'>";
+		echo "<td class='border' align='center' width='150'>";
 		echo $session->location . "<br />\n";
 		echo "</td>";
 
+$table_version = 3;
+if ($table_version == 2) {
+### version 2 --- div's to float left
+		print "<td><table class='sessionshaper'><tr><td style='padding: 0;margin:0'>\n";
 		for ($i = 0; $i < $max; $i ++) {
+//			print "<div class='boxme'>Item</div>";
 			if ($i < $count) {
 				if ($ulist[$i] == $name) {
-					echo "<td width=\"80px\" align=\"center\" bgcolor='$mysquarecolor'>";
+//					echo "<td width=\"80px\" align=\"center\" bgcolor='$mysquarecolor' style='padding: 0;margin:0'>";
+					print "<div class='boxme'>";
 					echo "$ulist[$i]";
-					echo "<form method=\"post\" action=\"$PHP_SELF\">";
+					echo "<form method=\"post\" action=\"$PHP_SELF#jump$jump\">";
 					echo "<input type=\"hidden\" name=\"Name\" value=\"$name\">";
 					echo "<input type=\"hidden\" name=\"USID\" value=\"$USID\">";
 					echo "<input style=\"background:red\" type=\"submit\" name='Action' value=\"Remove\">";
 					echo "</form>\n";
 				} else {
-					echo "<td width=\"80px\" align=\"center\" bgcolor='$yoursquarecolor'>";
+					print "<div class='boxthem'>";
+//					echo "<td width=\"80px\" align=\"center\" bgcolor='$yoursquarecolor' style='padding: 0;margin:0'>";
 					echo "$ulist[$i]";
 				}
 			} else {
-				echo "<td width=\"80px\" align=\"center\" bgcolor='$nonesquarecolor'>";
+				print "<div class='boxnone'>";
+//				echo "<td width=\"80px\" align=\"center\" bgcolor='$nonesquarecolor' style='padding: 0;margin:0'>";
+				echo "&nbsp;";
+			}
+			print "</div>\n";
+			if (($i+1) % $max_enrolments_per_line == 0) {
+				print "<br />";
+			}
+		}
+		print "</td></tr></table></td>\n";
+}
+else if ($table_version == 1) {
+## version 1 --- simple table
+		for ($i = 0; $i < $max; $i ++) {
+			if ($i < $count) {
+				if ($ulist[$i] == $name) {
+					echo "<td width=\"80px\" align=\"center\" bgcolor='$mysquarecolor' style='padding: 0;margin:0'>";
+					echo "$ulist[$i]";
+					echo "<form method=\"post\" action=\"$PHP_SELF#jump$jump\">";
+					echo "<input type=\"hidden\" name=\"Name\" value=\"$name\">";
+					echo "<input type=\"hidden\" name=\"USID\" value=\"$USID\">";
+					echo "<input style=\"background:red\" type=\"submit\" name='Action' value=\"Remove\">";
+					echo "</form>\n";
+				} else {
+					echo "<td width=\"80px\" align=\"center\" bgcolor='$yoursquarecolor' style='padding: 0;margin:0'>";
+					echo "$ulist[$i]";
+				}
+			} else {
+				echo "<td width=\"80px\" align=\"center\" bgcolor='$nonesquarecolor' style='padding: 0;margin:0'>";
 				echo "&nbsp;";
 			}
 			echo "</td>";
 		}
+}
+else if ($table_version == 3) {	# same as version 1 but make multiple rows using table rows.
+## version 1 --- simple table
+		print "<td class='sessionholder'><table class='sessionrows'><tr>\n";
+		for ($i = 0; $i < $max; $i ++) {
+			if ($i < $count) {
+				if ($ulist[$i] == $name) {
+#					echo "<td width=\"80px\" height='40' align=\"center\" bgcolor='$mysquarecolor' style='padding: 0;margin:0'>";
+					echo "<td class='sessionelement' bgcolor='$mysquarecolor'>";
+					echo "$ulist[$i]";
+					echo "<form method=\"post\" action=\"$PHP_SELF#jump$jump\">";
+					echo "<input type=\"hidden\" name=\"Name\" value=\"$name\">";
+					echo "<input type=\"hidden\" name=\"USID\" value=\"$USID\">";
+					echo "<input style=\"background:red\" type=\"submit\" name='Action' value=\"Remove\">";
+					echo "</form>\n";
+					echo "</td>";
+				} else {
+#					echo "<td width=\"80px\" align=\"center\" bgcolor='$yoursquarecolor' style='padding: 0;margin:0'>";
+					echo "<td class='sessionelement' bgcolor='$yoursquarecolor'>";
+					echo "$ulist[$i]";
+					echo "</td>";
+				}
+			} else {
+#				echo "<td width=\"80px\" align=\"center\" bgcolor='$nonesquarecolor' style='border: 0; padding: 0;margin:0'>";
+				echo "<td class='sessionelement' bgcolor='$nonesquarecolor'>";
+				echo "&nbsp;";
+				echo "</td>";
+			}
+			if (($i+1) % $max_enrolments_per_line == 0) {
+				print "</tr><tr>";
+			}
+		}
+		$remainder = $max % $max_enrolments_per_line;
+#		print "<td>remainder = $remainder</td>\n";
+		if ($remainder > 0) {
+			print "<td>&nbsp;</td>\n";
+		}
+		print "</tr></table></td>";
+#			if (($i+1) % $max_enrolments_per_line == 0) {
+#				print "<br />";
+#			}
+}
 
 		echo "</tr>";
 		echo "</table>";
 	}
+	$jump ++;
+	echo "<a name='jump$jump'></a>";	// this is here so that the jump to the last item will still work - even if the last item is deleted!
 	if ($available == 0) {
 		print "<br /><br />There are currently no sessions available\n";
 	}
@@ -648,9 +763,8 @@ function print_header($title, $version) {
 <title>$title</title>
 <link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />
 </head>
-<body bgcolor='#ffffe0'>
-<div style='font-weight: bold; font-size:24;'>$title</div>";
-//<h2>$title</h2>";
+<body>
+<div id='maintitle'>$title</div>";
 	if ($version != "") {
 		if (preg_match('/^devel/', $version)) {
 			print '<div style="color: red; font-size: 10px;">'.$version.'</div>';
@@ -659,6 +773,18 @@ function print_header($title, $version) {
 		}
 	}
 } // end: print_header
+
+// given a week number, return a string represent Monday of that week
+function weeknumber2monday($week_number, $src_timestamp) {
+	$tsa = getdate($src_timestamp);
+	$monday_day = $tsa["yday"] - $tsa["wday"] + 1;
+
+	$zero_day = mktime(12, 0, 0, 1, 1, $tsa["year"]);
+
+	$monday_ts = $zero_day + ($monday_day * 86400);
+
+	return date("l jS F", $monday_ts);
+}
 
 function footer() {
 	global $admin_mode;
@@ -701,7 +827,7 @@ function print_notices($file) {
 	echo "</ul>\n";
 	if ($admin_mode == 1) {
 		if ($check_tainted_content == 1) {
-			echo "<font color='red'>SECURITY ALERT - found disallowed html tag - check source contents of Notices</font>\n";
+			echo "<font class='securityalert'>SECURITY ALERT - found disallowed html tag - check source contents of Notices</font>\n";
 		}
 		echo "<form method=\"post\" action=\"$PHP_SELF\">";
 		echo "<input type=\"hidden\" name=\"Name\" value=\"$name\">";

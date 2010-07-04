@@ -1,3 +1,14 @@
+2.2
+	sessions display in multiple rows (configurable number per row)
+	after actions performed, now will jump back to the same location on the page
+	option (default: hide) to hide Session ID (only relevent when in admin mode)
+	migrate more settings into css
+	print new header with each week: "Sessions for week beginning Monday xx of xx"
+	use smaller fonts (can set in style.css)
+	some minor tweaks
+
+	KNOWN ISSUES: Admin functions dont seem to work in IE8. Don't know why not.
+
 2.1.1	fixed: "Set" and "Clear" are logging as "unknown actions"
 	fixed: tooltips on admin icons now work
 	hide Reload button
