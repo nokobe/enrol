@@ -1,5 +1,5 @@
 <?php
-	$version = "version 2.2";
+	$version = "version 2.2.1";
 	$BASE = "./";
 	require_once $BASE.'config.inc';
 	require_once $BASE.'datetime.php';
@@ -700,14 +700,19 @@ function print_datetime_selection($ts) {
 	$hours = $tsa["hours"];
 	$ampm = "AM";
 	$min = $tsa["minutes"];
-	// calculate minute to nearest 10 minute mark
-	$min = round($min / 10) * 10;
+//	// calculate minute to nearest 10 minute mark
+//	$min = round($min / 10) * 10;
+//	change to ... nearest 15 minute mark
+	$min = round($min / 15) * 15;
 	if ($min == 60) {
 		$hours ++;
 		$min = 0;
 	}
 	if ($hours > 12) {
 		$hours -= 12;
+		$ampm = "PM";
+	}
+	if ($hours == 12) {
 		$ampm = "PM";
 	}
 	if ($hours == 0) {

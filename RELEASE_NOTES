@@ -1,3 +1,6 @@
+2.2.1
+	change minutes interval from 10 to 15 (eg. shows 0,15,30,45)
+	fixed: 12:xxPM was reverting to 12:xxAM on edit/load
 2.2
 	sessions display in multiple rows (configurable number per row)
 	after actions performed, now will jump back to the same location on the page

@@ -153,8 +153,8 @@
     function createMinutes($id='minute_select', $selected=null)
     {
         /*** array of mins ***/
-#        $minutes = array(0, 15, 30, 45);
-        $minutes = array(0, 10, 20, 30, 40, 50);
+        $minutes = array(0, 15, 30, 45);
+#        $minutes = array(0, 10, 20, 30, 40, 50);
 
     $selected = in_array($selected, $minutes) ? $selected : 0;
 
