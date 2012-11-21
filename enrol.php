@@ -1,5 +1,5 @@
 <?php
-	$version = "version 2.2.1";
+	$version = "version 2.2.2";
 	$BASE = "./";
 	require_once $BASE.'config.inc';
 	require_once $BASE.'datetime.php';
@@ -24,6 +24,8 @@
 	$SESSIONS_FILE = $config_sessions_data_file;
 	$NOTICES_FILE = $config_notices_file;
 	$EVENT_LOG = $config_log_file;
+
+	date_default_timezone_set("Australia/Melbourne");
 
 	/* ======================= READ POST INPUT ======================= */
 
