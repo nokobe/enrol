@@ -25,4 +25,6 @@ $config_colour_table_header = "lightblue";
 /* Technical */
 
 $config_show_session_id = FALSE;	/* can be useful to turn on for diagnostics */
+$config_on_production = TRUE;
+$config_debug = FALSE;
 ?>

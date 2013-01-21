@@ -1,8 +1,8 @@
 <?php
-	$version = "version 2.2.2";
+	$version = "version 2.3";
 	$BASE = "./";
-	require_once $BASE.'config.inc';
-	require_once $BASE.'datetime.php';
+	require_once $BASE.'includes/config.inc.php';
+	require_once $BASE.'includes/datetime.php';
 
 	/* ======================= INITIALISE VARIABLES ======================= */
 
@@ -21,9 +21,9 @@
 	$max_enrolments_per_line = $config_max_enrolments_per_line;
 
 	$TITLE = $config_title;
-	$SESSIONS_FILE = $config_sessions_data_file;
-	$NOTICES_FILE = $config_notices_file;
-	$EVENT_LOG = $config_log_file;
+	$SESSIONS_FILE = "data/".$config_sessions_data_file;
+	$NOTICES_FILE = "data/".$config_notices_file;
+	$EVENT_LOG = "data/".$config_log_file;
 
 	date_default_timezone_set("Australia/Melbourne");
 
@@ -131,17 +131,17 @@
 		$session = $sessionarray[0];
 
 		$mu = $session->maxusers;
-		$enrolled_list = "";
+		$enrolled_list = array();
 		if ($session->userlist != "") {
 			$enrolled_list = explode ( "|", $session->userlist);
 		}
 		$curr_size = count($enrolled_list);
 		if ($curr_size >= $mu) {
-			$status = "Sorry, that class is full";
+			$status[] = "Sorry, that class is now full";
 		} else {
 			$enrolled_list[] = $name;
 			$session->userlist = implode( "|", $enrolled_list);
-#			$status = "Added you to session $ID";
+#			$status[] = "Added you to session $ID";
 			$save_changes = 1;
 			log_event("enrolled in session (ID = $USID) $session->whenstr at $session->location");
 		}
@@ -155,18 +155,18 @@
 
 		$mu = $session->maxusers;
 
-		$enrolled_list = "";
+		$enrolled_list = array();
 		if ($session->userlist != "") {
 			$enrolled_list = explode ( "|", $session->userlist);
 		}
 
 		$key = array_search($name, $enrolled_list);
 		if ($key === FALSE) { // hmm... not found.. this is unexpected
-			$status = "Error. Your name $name not found in list";
+			$status[] = "Error. Your name $name not found in list";
 		} else {
 			unset ( $enrolled_list[$key] );
 			$session->userlist = implode( "|", $enrolled_list);
-#			$status = "Removed you from session $ID";
+#			$status[] = "Removed you from session $ID";
 			$save_changes = 1;
 			log_event("un-enrolled in session (ID = $USID) $session->whenstr at $session->location");
 		}
@@ -272,13 +272,12 @@
 
 	/* ======================= PRINT OUR BASIC PAGE ======================= */
 
-
 	// Load and show any notices/announcements
 
 	print_notices($NOTICES_FILE);
 
 	// print refresh button
-	if (0) {
+	if ($config_on_production === FALSE) {
 		echo "<br />";
 		echo "<form method=\"post\" action=\"$PHP_SELF\">";
 		echo "<input type=\"hidden\" name=\"Name\" value=\"$name\">";
@@ -289,9 +288,9 @@
 	// print name, with options to Set/Clear
 
 	if ($name == "") {
-		echo "<img border='0' alt='step 1 - set your name' src='step1-full.png' align='left'>";
+		echo "<img border='0' alt='step 1 - set your name' src='images/step1-full.png' align='left'>";
 	} else {
-//		echo "<img border='0' alt='step 1 - set your name' src='step1-full-gray.png' align='left'>";
+//		echo "<img border='0' alt='step 1 - set your name' src='images/step1-full-gray.png' align='left'>";
 	}
 	print_name($name);
 //	echo "<br />\n";
@@ -342,12 +341,12 @@
 #	list($xml, $save_changes) = load_sessions_file($SESSIONS_FILE);
 
 	if ($name == "") {
-//		echo "<img border='0' alt='step 2 - select your classes' src='step2-full-gray.png'>";
+//		echo "<img border='0' alt='step 2 - select your classes' src='images/step2-full-gray.png'>";
 	} else {
 		if ($admin_mode) {
 			echo "<br />";
 		} else {
-			echo "<img border='0' alt='step 2 - select your classes' src='step2-full.png'>";
+			echo "<img border='0' alt='step 2 - select your classes' src='images/step2-full.png'>";
 		}
 	}
 	$header_counter = 0;
@@ -457,16 +456,12 @@
 			echo "<input type=\"hidden\" name=\"USID\" value=\"$USID\">";
 			echo "<input type='hidden' name='Context' value='editsession'>";
 			if ($session->active == "yes") {
-				echo "<input type='image' src='icons/remove.png' name=\"Action\" value=\"Close\" alt='Close Session' title='Close Session'>";
-				echo "&nbsp;";
-				echo "<input type='image' src='icons/edit.png' name=\"Action\" value=\"Edit\" alt='Edit Session' title='Edit Session'>";
+				echo "<button type='submit' name='Action' value='Close' alt='Close Session' title='Close Session' class='icon'><img src='icons/remove.png' class='icon'></button>";
+				echo "<button type='submit' name='Action' value='Edit' alt='Edit Session' title='Edit Session' class='icon'><img src='icons/edit.png' class='icon'></button>";
 			} else {
-				echo "<input type='image' src='icons/add.png' name=\"Action\" value=\"Open\" alt='Open Session' title='Open Session'>";
-				echo "&nbsp;";
-				echo "<input type='image' src='icons/edit.png' name=\"Action\" value=\"Edit\" alt='Edit Session' title='Edit Session'>";
-				echo "&nbsp;";
-				echo "&nbsp;";
-				echo "<input type='image' src='icons/close.png' name='Action' value='Delete' alt='Delete Session' title='Delete Session'>";
+				echo "<button type='submit' name='Action' value='Open' alt='Open Session' title='Open Session' class='icon'><img src='icons/add.png' class='icon'></button>";
+				echo "<button type='submit' name='Action' value='Edit' alt='Edit Session' title='Edit Session' class='icon'><img src='icons/edit.png' class='icon'></button>";
+				echo "<button type='submit' name='Action' value='Delete' alt='Delete Session' title='Delete Session' class='icon'><img src='icons/close.png' class='icon'></button>";
 			}
 			echo "</form>";
 			echo "</td>";
@@ -622,6 +617,15 @@ else if ($table_version == 3) {	# same as version 1 but make multiple rows using
 		echo "</td></tr></table>";
 	}
 
+	/* ======================= SHOW ANY STATUS ALERTS ======================= */
+	foreach ($status as $m) {
+		#echo "<div class='info'>$m</div>";
+		echo "<script language=\"javascript\" type=\"text/javascript\">";
+		echo "alert('$m')\n";
+		echo "</script>";
+	}
+
+
 	footer();
 	exit(0);
 
@@ -631,7 +635,7 @@ function load_sessions_file($file) {
 	global $time_last_moded;
 
 	if (!file_exists($file)) {
-		die ("fatal: messing sessions file");
+		die ("fatal: missing sessions file ($file)");
 	}
 	if (filesize($file) == 0) {
 		// starting from scratch - empty sessions file
@@ -768,7 +772,7 @@ function print_header($title, $version) {
 <html>
 <head>
 <title>$title</title>
-<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />
+<link rel=\"stylesheet\" type=\"text/css\" href=\"css/style.css\" />
 </head>
 <body>
 <div id='maintitle'>$title</div>";
@@ -828,7 +832,7 @@ function print_notices($file) {
 		if (preg_match('/^\s*$/', $line)) {
 			print "<li>&nbsp;";
 		} else {
-			echo "<li><img src='bullet.gif' alt='-' border='0'> $line\n";
+			echo "<li><img src='icons/bullet.gif' alt='-' border='0'> $line\n";
 		}
 	}
 	echo "</ul>\n";
@@ -887,4 +891,3 @@ function my_mktime($day, $mon, $year, $hour, $min, $ampm) {
 }
 //		int mktime  ([  int $hour = date("H")  [,  int $minute = date("i")  [,  int $second = date("s")  [,  int $month = date("n")  [,  int $day = date("j")  [,  int $year = date("Y")  [,  int $is_dst = -1  ]]]]]]] )
 ?>
-

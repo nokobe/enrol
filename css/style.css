@@ -211,3 +211,10 @@ a.selector {
 	width: 80px;
 /*	background-color: lightpink*/
 }
+
+button.icon {
+	padding: 0;
+	margin: 0;
+	background-color: transparent;
+	border: 0;
+}
