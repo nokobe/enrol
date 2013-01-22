@@ -1,5 +1,5 @@
 <?php
-	$version = "version 2.3.1";
+	$version = "version 2.3.2";
 	$BASE = "./";
 	require_once $BASE.'includes/config.inc.php';
 	require_once $BASE.'includes/datetime.php';
@@ -874,12 +874,12 @@ function print_name($name) {
 } // end: print_name
 
 function log_event($text) {
-	global $EVENT_LOG, $REMOTE_ADDR, $name;
+	global $EVENT_LOG, $name;
 
 	$t = time();
 	$ts = date("D M j, Y, g:ia");
 	$fh = fopen($EVENT_LOG, 'a') or die("can't open logfile");
-	$ip = @$REMOTE_ADDR;
+	$ip = $_SERVER['REMOTE_ADDR'];
 	fwrite($fh, $ts. " ".$ip." as ".$name. ": ".$text. "\n");
 	fclose($fh);
 }
