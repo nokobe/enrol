@@ -1,5 +1,5 @@
 <?php
-	$version = "version 2.3";
+	$version = "version 2.3.1";
 	$BASE = "./";
 	require_once $BASE.'includes/config.inc.php';
 	require_once $BASE.'includes/datetime.php';
@@ -39,6 +39,8 @@
 
 	$action = @$_POST["Action"];
 	$context = @$_POST["Context"];
+
+	$status = array();
 
 	/* ======================= SET NAME and ADMIN_MODE--- FROM COOKIE IF POSSIBLE/NECESSARY ======================= */
 
@@ -618,13 +620,14 @@ else if ($table_version == 3) {	# same as version 1 but make multiple rows using
 	}
 
 	/* ======================= SHOW ANY STATUS ALERTS ======================= */
-	foreach ($status as $m) {
-		#echo "<div class='info'>$m</div>";
-		echo "<script language=\"javascript\" type=\"text/javascript\">";
-		echo "alert('$m')\n";
-		echo "</script>";
+	if ($status) {
+		foreach ($status as $m) {
+			#echo "<div class='info'>$m</div>";
+			echo "<script language=\"javascript\" type=\"text/javascript\">";
+			echo "alert('$m')\n";
+			echo "</script>";
+		}
 	}
-
 
 	footer();
 	exit(0);

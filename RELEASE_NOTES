@@ -1,3 +1,18 @@
+2.3.1
+	bugfix: fix logged errors when $status was empty
+
+2.3 Bugfixes plus some file/dir layout improvements
+	Bugfix: fixed KNOWN ISSUE where admin functions didn't work in Firefox
+	minor reworking of files/directories for better layout and security
+	- eg. config.inc now called config.inc.php
+	(was due to firefox changing the wasy POST values were submitted for images)
+	Now uses popup alert if class becomes full between loading and enroling
+	New config item allows conditionals based on PROD or TEST etc.
+	- eg. now shows Reload button (for easier testing) but only if not in Production mode
+
+2.2.2
+	fix: set default timezone to avoid warnings/errors on newer versions of php
+
 2.2.1
 	change minutes interval from 10 to 15 (eg. shows 0,15,30,45)
 	fixed: 12:xxPM was reverting to 12:xxAM on edit/load
