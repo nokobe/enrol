@@ -6,14 +6,14 @@
 
 	/* ======================= INITIALISE VARIABLES ======================= */
 
-	$PHP_SELF = $_SERVER['PHP_SELF'];
+	$PHP_SELF = htmlentities($_SERVER['PHP_SELF']);
+	$greeting = "Welcome";
 
 	$mysquarecolor = $config_colour_me;
 	$yoursquarecolor = $config_colour_them;
 	$nonesquarecolor = $config_colour_none;
 	$tableheadercolor = $config_colour_table_header;
 	$default_session_size = $config_default_session_size;
-	$page_header_frequency = $config_page_header_frequency;
 	$admin_user = $config_admin_user;
 	$show_session_id = $config_show_session_id;
 	$max_enrolments_per_line = $config_max_enrolments_per_line;
@@ -41,30 +41,22 @@
 	$status = array();
 
 	/* ======================= SET NAME and ADMIN_MODE--- FROM COOKIE IF POSSIBLE/NECESSARY ======================= */
+	/* =======================  HANDLE Login/Session/Cookie =======================  */
 
-	if ($name == "" and isset($_COOKIE['Name'])) {
-		$name = $_COOKIE['Name'];
-	}
-	setcookie('Name', $name);
+	session_start();
+	$user = get_user_from_session_or_cookie();
 
-	// Have to handle action==clear now
+	$name = $user;
 
-	if ($action == "Clear") {
-		$name = "";
-	}
-
+	$admin_mode = 0;
 	if ($name == $admin_user) {
 		$admin_mode = 1;
-	} else {
-		$admin_mode = 0;
 	}
 	if (in_array($name, $config_admin_users)) {
 		$admin_mode = 1;
 	}
 
 	/* ======================= PRINT INTRO ======================= */
-
-	print_header($TITLE, $version);
 
 // DEBUG
 // print "[[ name = $name";
@@ -80,6 +72,12 @@
 
 	if ($context == "notices") {
 		if ($action == "Edit") {
+			print_header($TITLE, $version);
+			top_bar($TITLE, "Edit Notices");
+			print_notices($NOTICES_FILE, $action == "Edit" ? 0 : $admin_mode);
+//			print_refresh_button();
+//			print_admin_toolbox($action == "Edit" ? 0 : $admin_mode);
+
 			$notices = file_get_contents($NOTICES_FILE);
 //			echo "Edit Notices:<br />";
 			echo "Editing: $NOTICES_FILE" . ":<br />";
@@ -91,7 +89,7 @@
 			echo "<input type='submit' name='Action' value='Cancel'>";
 			echo "<input type='submit' name='Action' value='Save' >";
 			echo "</form>";
-			footer();
+			print_footer();
 			exit(0);
 		}
 		if ($action == "Cancel") {
@@ -226,6 +224,12 @@
 			print "<h2>Error: attempt to reset SessionID when there are still sessions</h2>";
 		}
 	} else if ($action == "Edit" and $context == "editsession" ) {
+		print_header($TITLE, $version);
+		top_bar($TITLE, "Edit Session");
+//		print_notices($NOTICES_FILE, $action == "Edit" ? 0 : $admin_mode);
+//		print_refresh_button();
+//		print_admin_toolbox($action == "Edit" ? 0 : $admin_mode);
+
 		$USID = $_POST["USID"];
 		$sessionarray = $xml->xpath("/sessions/session[usid=$USID]");
 		$session = $sessionarray[0];
@@ -249,7 +253,7 @@
 		print "
 			</form>
 			</fieldset>";
-		footer();
+		print_footer();
 		exit(0);
 	} else if ($action == "Delete" and $context == "editsession" ) {
 		$USID = $_POST["USID"];
@@ -298,34 +302,17 @@
 		}
 	}
 
-	/* ======================= PRINT OUR BASIC PAGE ======================= */
+	/* ======================= BEGIN MAIN PAGE ======================= */
 
-	// Load and show any notices/announcements
+	print_header($TITLE, $version);
+	top_bar($TITLE);
+	print_notices($NOTICES_FILE, $action == "Edit" ? 0 : $admin_mode);
+	print_refresh_button();
+	print_admin_toolbox($action == "Edit" ? 0 : $admin_mode);
 
-	print_notices($NOTICES_FILE);
-
-	// print refresh button
-	if ($config_on_production === FALSE) {
-		echo "<br />";
-		echo "<form method=\"post\" action=\"$PHP_SELF\">";
-		echo "<input type=\"hidden\" name=\"Name\" value=\"$name\">";
-		echo "<input type='submit' value='Reload'>";
-		echo "</form>";
-	}
-
-	// print name, with options to Set/Clear
-
-	if ($name == "") {
-		echo "<img border='0' alt='step 1 - set your name' src='images/step1-full.png' align='left'>";
-	}
-//	else {
-//		echo "<img border='0' alt='step 1 - set your name' src='images/step1-full-gray.png' align='left'>";
-//	}
-	print_name($name);
-//	echo "<br />\n";
-
-	// -- option to add new session
-	if ($admin_mode == 1) {
+	// -- option to add new session... but only if we're not editing something else
+	if ($admin_mode == 1 and $action != "Edit") {
+		print "<div class=\"adminFunction\">\n";
 		$sess_str = $show_session_id ? " (SessionID: $nextID)" : "";
 		print "<fieldset>
 			<legend>Add New Session$sess_str</legend>
@@ -357,6 +344,7 @@
 		print "
 			</form>
 			</fieldset>";
+		print "</div>\n";
 	}
 
 	/* ======================= THE ENROLMENT TABLE ======================= */
@@ -369,9 +357,6 @@
 
 #	list($xml, $save_changes) = load_sessions_file($SESSIONS_FILE);
 
-	if ($name) {
-		echo "<img border='0' alt='step 2 - select your classes' src='images/step2-full.png'>";
-	}
 	$header_counter = 0;
 	$in_use = array();
 
@@ -415,6 +400,7 @@
 		$max = $session->maxusers;
 		$jump ++;
 		echo "<a name='jump$jump'></a>";
+		echo '<div class="'.($session->active == "yes" ? "openSession" : "closedSession").'">';
 		echo "<table>";
 
 		// calculate if we need to print a weekly header:
@@ -473,8 +459,8 @@
 			echo "<input type=\"hidden\" name=\"Name\" value=\"$name\">";
 			echo "<input type=\"hidden\" name=\"USID\" value=\"$USID\">";
 
-			if ($name === "") {
-				echo "<input type=\"submit\" value=\"Set your name\" disabled>";
+			if ($name == "") {
+				echo "<input type=\"submit\" value=\"Log in first\" disabled>";
 			} else {
 				if (array_search($name, $ulist) === FALSE) {	# if not enroled...
 					if ($count < $max) {
@@ -512,12 +498,14 @@
 					echo "<td class='sessionelement' bgcolor='$yoursquarecolor'>";
 					echo "$ulist[$i]";
 					if ($admin_mode and $session->active == "yes") {
+						echo "<div class=\"adminFunction\">\n";
 						echo "<form method=\"post\" action=\"$PHP_SELF#jump$jump\">";
 						echo "<input type=\"hidden\" name=\"Name\" value=\"$name\">";
 						echo "<input type=\"hidden\" name=\"Remove\" value=\"$ulist[$i]\">";
 						echo "<input type=\"hidden\" name=\"USID\" value=\"$USID\">";
 						echo "<input type=\"submit\" name='Action' value=\"AdminRemove\">";
 						echo "</form>\n";
+						echo "</div>\n";
 					}
 					echo "</td>";
 				}
@@ -537,6 +525,7 @@
 		print "</tr></table></td>";
 		echo "</tr>";
 		echo "</table>";
+		echo "</div>";
 	}
 	$jump ++;
 	echo "<a name='jump$jump'></a>";	// this is here so that the jump to the last item will still work - even if the last item is deleted!
@@ -567,7 +556,7 @@
 		}
 	}
 
-	footer();
+	print_footer();
 	exit(0);
 
 /* ======================= FUNCTIONS ======================= */
@@ -709,22 +698,16 @@ function print_datetime_selection($ts) {
 } // end print_datetime_selection
 
 function print_header($title, $version) {
-	print "
+	print <<<EOT
 <html>
 <head>
 <title>$title</title>
-<link rel=\"stylesheet\" type=\"text/css\" href=\"css/style.css\" />
+<link rel="stylesheet" type="text/css" href="css/style.css" />
+<script type='text/javascript' src="js/showhide.js"></script>
 </head>
 <body>
-<div id='maintitle'>$title</div>";
-	if ($version != "") {
-		if (preg_match('/^devel/', $version)) {
-			print '<div style="color: red; font-size: 10px;">'.$version.'</div>';
-		} else {
-			print '<div style="font-size: 10px;">'.$version.'</div>';
-		}
-	}
-} // end: print_header
+EOT;
+}
 
 // given a week number, return a string represent Monday of that week
 function weeknumber2monday($week_number, $src_timestamp) {
@@ -738,19 +721,27 @@ function weeknumber2monday($week_number, $src_timestamp) {
 	return date("l jS F", $monday_ts);
 }
 
-function footer() {
-	global $admin_mode;
-	echo "<br /><br />\n";
+function print_footer() {
+	global $admin_mode, $version;
+	echo "<br />\n";
 	if ($admin_mode) {
-		echo "<div class='footer'>&bull; enrol software by mbates &bull; Icons by <a href='http://dryicons.com;'>DryIcons</a> &bull;</div>";
+		echo "<div class='footer'>&bull; enrol (version $version) by mbates &bull; Icons by <a href='http://dryicons.com;'>DryIcons</a> &bull;</div>";
 	} else {
-		echo "<div class='footer'>&bull; enrol software by mbates &bull; </div>";
+		echo "<div class='footer'>&bull; enrol (version $version) by mbates &bull; </div>";
 	}
 	echo "</body></html>\n";
-} // end: footer
+} // end: print_footer
 
-function print_notices($file) {
-	global $admin_mode;
+# old code... delete me
+#	if ($version != "") {
+#		if (preg_match('/^devel/', $version)) {
+#			print '<div style="color: red; font-size: 10px;">'.$version.'</div>';
+#		} else {
+#			print '<div style="font-size: 10px;">'.$version.'</div>';
+#		}
+#	}
+
+function print_notices($file, $admin_mode) {
 	global $name;
 	global $PHP_SELF;
 
@@ -781,35 +772,17 @@ function print_notices($file) {
 		if ($check_tainted_content == 1) {
 			echo "<font class='securityalert'>SECURITY ALERT - found disallowed html tag - check source contents of Notices</font>\n";
 		}
+		print "<div class=\"adminFunction\">\n";
 		echo "<form method=\"post\" action=\"$PHP_SELF\">";
 		echo "<input type=\"hidden\" name=\"Name\" value=\"$name\">";
 		echo "<input type=\"hidden\" name='Context' value=\"notices\">";
 		echo "&nbsp;&nbsp;<input type=\"submit\" name='Action' value=\"Edit\">";
 		echo "</form>";
+		echo "</div>";
 	}
 #echo "</fieldset>\n";
 	echo "</div></div></div>\n";
 } // end: print_notices
-
-function print_name($name) {
-	global $PHP_SELF;
-	#echo "<fieldset>\n";
-	#echo "<legend>Set your name</legend>\n";
-	echo "<form method=\"post\" action=\"$PHP_SELF\">";
-	if ($name == "") {
-		echo "Name:<input type=\"text\" size=\"36\" maxlength=\"36\" name=\"Name\" value=\"$name\">";
-	} else {
-		echo "Name:<input type=\"text\" size=\"36\" maxlength=\"36\" name=\"Name\" value=\"$name\" disabled>";
-	}
-	if ($name == "") {
-		echo "<input type=\"submit\" name='Action' value=\"Set\">";
-	} else {
-		echo "<input type=\"submit\" name='Action' value=\"Set\" disabled>";
-		echo "<input type=\"submit\" name='Action' value=\"Clear\">";
-	}
-	echo "</form>";
-	#echo "</fieldset>\n";
-} // end: print_name
 
 function log_event($text) {
 	global $EVENT_LOG, $name;
@@ -831,4 +804,94 @@ function my_mktime($day, $mon, $year, $hour, $min, $ampm) {
 	return mktime($hour, $min, 0, $mon, $day, $year);
 }
 //		int mktime  ([  int $hour = date("H")  [,  int $minute = date("i")  [,  int $second = date("s")  [,  int $month = date("n")  [,  int $day = date("j")  [,  int $year = date("Y")  [,  int $is_dst = -1  ]]]]]]] )
+
+function top_bar($title, $breadcrumb) {
+	global $PHP_SELF;
+	global $greeting;
+	global $user;
+	global $admin_mode;
+
+	if ($breadcrumb != "") {
+		$BREAD = " > $breadcrumb ";
+	}
+	echo <<<EOT
+	<div class='topbar'>
+		<div id='title'><a href="$PHP_SELF">$title</a>$BREAD</div>
+		<div id='login'>
+EOT;
+		if ($admin_mode) {
+			$ADMIN = "(administrator access granted) ";
+		}
+		if($user != "") {
+			print "$greeting, $user. $ADMIN| <a href=\"logout.php\">Logout</a>";
+		} else {
+			print <<<EOT
+			<form method="post" action="$PHP_SELF">
+			Enter your name: <input type="text" size="36" maxlength="36" name="Name">
+			<input type="submit" value="Login">
+			<input type="checkbox" name="rememberMe" value="1"> Remember me
+			</form>
+EOT;
+		}
+		echo <<<EOT
+		</div>
+	</div>
+EOT;
+}
+
+function get_user_from_session_or_cookie() {
+	global $greeting;
+
+	$user = $_SESSION['user'];
+	if ($user == "") {
+		# A: a new user may have just logged on -> check POST['Name']
+		# B: check cookies for EnrolName
+		# or should that be, check B, then A??
+
+		if (isset($_POST['Name'])) {
+			$user = $_POST['Name'];
+			$_SESSION['user'] = $user;
+			if (isset($_POST['rememberMe'])) {
+				$twoMonths = 60 * 60 * 24 * 60 + time();
+				setcookie('EnrolName', $user, $twoMonths);
+			}
+		}
+		else if (isset($_COOKIE['EnrolName'])) {
+			$user = $_COOKIE['EnrolName'];
+			$_SESSION['user'] = $user;
+			$greeting = "Welcome back";
+		}
+		# else you really aren't logged in. Too bad.
+	}
+	return $user;
+}
+
+function print_refresh_button() {
+	global $config_on_production, $PHP_SELF, $name;
+
+	// print refresh button
+	if ($config_on_production === FALSE) {
+		echo "<form method=\"post\" action=\"$PHP_SELF\">";
+		echo "<input type=\"hidden\" name=\"Name\" value=\"$name\">";
+		echo "<input type='submit' value='Reload'>";
+		echo "</form>";
+	}
+}
+
+function print_admin_toolbox($admin_mode) {
+	if ($admin_mode == 1) {
+		echo '<div id="adminBox">';
+		echo <<<EOT
+			<fieldset>
+			<legend>Admin Toolbox</legend>
+EOT;
+		echo "<a href=\"javascript:showHideDivClass('adminFunction');\" class=\"linkAsButton\">show/hide Admin Functions</a>";
+		echo "<br />";
+		echo "<a href=\"javascript:showHideDivClass('closedSession');\" class=\"linkAsButton\">show/hide Closed Sessions</a>";
+		echo '</div>';
+		echo "<br />";
+		echo "</fieldset>\n";
+	}
+}
+
 ?>

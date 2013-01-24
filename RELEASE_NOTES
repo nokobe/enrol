@@ -1,3 +1,15 @@
+2.3.2-exp.1
+	uses SESSION rather than cookie (uses cookie if "remember me" clicked)
+	uses top-bar for user login (no password required)
+	top-bar shows bread-crumb of current action
+	hides other admin buttons and functions when editing
+	edit Notices now shows rendered version above edit box
+	javascript code for show/hide Admin Functions
+	javascript code for show/hide Closed Sessions
+	show/hide functions are currently available via an "Admin Toolbox"
+	however the javascript state is not yet retained - want to put this
+	state information into the SESSION to do that.
+
 2.3.2-exp
 	uses array of nominated admins, rather than special admin user
 	remove button changed to "remove me" to match "add me" button

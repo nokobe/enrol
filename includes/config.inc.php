@@ -1,6 +1,6 @@
 <?php
 
-$config_title = "Sessions";
+$config_title = "Set Your Title";
 $config_admin_user = "myadmin";	// deprecated
 $config_admin_users = array();
 $config_default_session_size = 8;
