@@ -1,3 +1,14 @@
+2.3.2-exp
+	uses array of nominated admins, rather than special admin user
+	remove button changed to "remove me" to match "add me" button
+	added AdminRemove function
+	cleared out unused config vars
+	cleared out old table layout code
+	made colours more basic (eg. bg now white)
+
+2.3.2
+	fix reference/access to REMOTE_ADDR
+
 2.3.1
 	bugfix: fix logged errors when $status was empty
 

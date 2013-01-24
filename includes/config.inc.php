@@ -1,7 +1,8 @@
 <?php
 
 $config_title = "Sessions";
-$config_admin_user = "myadmin";
+$config_admin_user = "myadmin";	// deprecated
+$config_admin_users = array();
 $config_default_session_size = 8;
 $config_max_enrolments_per_line = 8;
 $config_sessions_data_file = "sessions.xml";
@@ -18,8 +19,8 @@ $config_print_header_after_weekly_title = TRUE; // this goes well with weekly_ti
 /* Colours */
 
 $config_colour_me = "lightgreen";
-$config_colour_them ="#FAAC58";
-$config_colour_none = "lightpink";
+$config_colour_them ="lightgrey";
+$config_colour_none = "white";
 $config_colour_table_header = "lightblue";
 
 /* Technical */

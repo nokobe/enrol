@@ -1,5 +1,5 @@
 <?php
-	$version = "version 2.3.2";
+	$version = "version 2.3.2-exp";
 	$BASE = "./";
 	require_once $BASE.'includes/config.inc.php';
 	require_once $BASE.'includes/datetime.php';
@@ -14,10 +14,8 @@
 	$tableheadercolor = $config_colour_table_header;
 	$default_session_size = $config_default_session_size;
 	$page_header_frequency = $config_page_header_frequency;
-	$print_weekly_title = $config_print_weekly_title;
 	$admin_user = $config_admin_user;
 	$show_session_id = $config_show_session_id;
-	$print_header_after_weekly_title = $config_print_header_after_weekly_title;
 	$max_enrolments_per_line = $config_max_enrolments_per_line;
 
 	$TITLE = $config_title;
@@ -59,6 +57,9 @@
 		$admin_mode = 1;
 	} else {
 		$admin_mode = 0;
+	}
+	if (in_array($name, $config_admin_users)) {
+		$admin_mode = 1;
 	}
 
 	/* ======================= PRINT INTRO ======================= */
@@ -147,7 +148,7 @@
 			$save_changes = 1;
 			log_event("enrolled in session (ID = $USID) $session->whenstr at $session->location");
 		}
-	} else if ($action == "Remove") {
+	} else if ($action == "Remove Me") {
 		$USID = $_POST["USID"];
 		if ($USID == "") {
 			die("missing USID");
@@ -164,13 +165,38 @@
 
 		$key = array_search($name, $enrolled_list);
 		if ($key === FALSE) { // hmm... not found.. this is unexpected
-			$status[] = "Error. Your name $name not found in list";
+			$status[] = "Error. Your name \"$name\" not found in list";
 		} else {
 			unset ( $enrolled_list[$key] );
 			$session->userlist = implode( "|", $enrolled_list);
 #			$status[] = "Removed you from session $ID";
 			$save_changes = 1;
 			log_event("un-enrolled in session (ID = $USID) $session->whenstr at $session->location");
+		}
+	} else if ($action == "AdminRemove") {
+		$USID = $_POST["USID"];
+		if ($USID == "") {
+			die("missing USID");
+		}
+		$sessionarray = $xml->xpath("/sessions/session[usid=$USID]");
+		$session = $sessionarray[0];
+
+		$mu = $session->maxusers;
+
+		$enrolled_list = array();
+		if ($session->userlist != "") {
+			$enrolled_list = explode ( "|", $session->userlist);
+		}
+
+		$user_to_remove = @$_POST["Remove"];
+		$key = array_search($user_to_remove, $enrolled_list);
+		if ($key === FALSE) { // hmm... not found.. this is unexpected
+			$status[] = "Error. Name \"$user_to_remove\" not found in list";
+		} else {
+			unset ( $enrolled_list[$key] );
+			$session->userlist = implode( "|", $enrolled_list);
+			$save_changes = 1;
+			log_event("Admin user un-enrolled $user_to_remove from session (ID = $USID) $session->whenstr at $session->location");
 		}
 	} else if ($action == "Open") {
 		$USID = $_POST["USID"];
@@ -291,9 +317,10 @@
 
 	if ($name == "") {
 		echo "<img border='0' alt='step 1 - set your name' src='images/step1-full.png' align='left'>";
-	} else {
-//		echo "<img border='0' alt='step 1 - set your name' src='images/step1-full-gray.png' align='left'>";
 	}
+//	else {
+//		echo "<img border='0' alt='step 1 - set your name' src='images/step1-full-gray.png' align='left'>";
+//	}
 	print_name($name);
 //	echo "<br />\n";
 
@@ -342,14 +369,8 @@
 
 #	list($xml, $save_changes) = load_sessions_file($SESSIONS_FILE);
 
-	if ($name == "") {
-//		echo "<img border='0' alt='step 2 - select your classes' src='images/step2-full-gray.png'>";
-	} else {
-		if ($admin_mode) {
-			echo "<br />";
-		} else {
-			echo "<img border='0' alt='step 2 - select your classes' src='images/step2-full.png'>";
-		}
+	if ($name) {
+		echo "<img border='0' alt='step 2 - select your classes' src='images/step2-full.png'>";
 	}
 	$header_counter = 0;
 	$in_use = array();
@@ -380,7 +401,9 @@
 		if ($session->active != "yes" and !$admin_mode) {
 			continue;
 		}
-		$available ++;
+		if ($session->active == "yes") {
+			$available ++;
+		}
 
 		$ulist = array();	# empty array
 		if ($session->userlist != "") {
@@ -390,194 +413,115 @@
 			$count = 0;
 		}
 		$max = $session->maxusers;
-
-		$SESS_TITLE = "";
-		$SESS_CELL = "";
-		if ($admin_mode and $show_session_id) {
-			$SESS_TITLE = "<th class='border'>ID</td>";
-			$SESS_CELL = "<td class='border' width='26' align='center'>$USID</td>";
-		}
-//			echo "<td width='110' align='center' valign='center'>";
-
 		$jump ++;
 		echo "<a name='jump$jump'></a>";
 		echo "<table>";
-		if (($page_header_frequency > 0 || $header_counter == 0) and !$print_weekly_title) {
-			if ($header_counter % $page_header_frequency == 0) {
-				// print table header row
-				if ($admin_mode == 1) {
-					echo "<tr bgcolor='$tableheadercolor'><th class='border' colspan='2'>Administration</th>$SESS_TITLE<th class='border'>When</th><th class='border'>Location</th><th class='border' colspan=$max>Attendees</th></tr>\n";
-				} else {
-					echo "<tr bgcolor='$tableheadercolor'><th class='border'></th>$SESS_TITLE<th class='border'>When</th><th class='border'>Location</th><th class='border' colspan=$max>Attendees</th></tr>\n";
-				}
-				// end: print table header row
-			}
-		}
-		if ($print_weekly_title) {
-			// calculate if we need to print a weekly header:
-			// if this session is not in same week as prev session
-			// 	print header for this week
-			// prev = week number of this session
-			$this_week_number = date("W", (int)$session->when);
 
-			if ($this_week_number != $prev_week_number) {
-				$mondaystr = weeknumber2monday($this_week_number, (int)$session->when);
-				print "<div class='weeklyheader'>Sessions for week starting $mondaystr</div>\n";
-				// duplicating header code here.. (rather than using more complex logic to decide when we need to print it. Maybe should make this snippet a subroutine
-				if ($print_header_after_weekly_title) {
-					// print table header row
-					if ($admin_mode == 1) {
-						echo "<tr bgcolor='$tableheadercolor'><th class='border' colspan='2'>Administration</th>$SESS_TITLE<th class='border'>When</th><th class='border'>Location</th><th class='border' colspan=$max>Attendees</th></tr>\n";
-					} else {
-						echo "<tr bgcolor='$tableheadercolor'><th class='border'></th>$SESS_TITLE<th class='border'>When</th><th class='border'>Location</th><th class='border' colspan=$max>Attendees</th></tr>\n";
-					}
-					// end: print table header row
+		// calculate if we need to print a weekly header:
+		// if this session is not in same week as prev session
+		// 	print header for this week
+		// prev = week number of this session
+		$this_week_number = date("W", (int)$session->when);
+
+		if ($this_week_number != $prev_week_number) {
+			$mondaystr = weeknumber2monday($this_week_number, (int)$session->when);
+			echo "<div class='weeklyheader'>Sessions for week starting $mondaystr</div>\n";
+			echo "<tr bgcolor='$tableheadercolor'>";
+			if ($admin_mode) {
+				echo "<th class='border' colspan='2'>Administration</th>";
+				if ($show_session_id) {
+					echo "<th class='border'>ID</th>";
 				}
 			}
-			$prev_week_number = date("W", (int)$session->when);	// return value is a string, but we should be able to treat it as an integer.
-
+			echo "<th class='border'>Actions</th><th class='border'>When</th><th class='border'>Location</th><th class='border' colspan=$max>Attendees</th></tr>\n";
 		}
+		$prev_week_number = date("W", (int)$session->when);	// return value is a string, but we should be able to treat it as an integer.
+
 		$header_counter ++;
 
 		echo "<tr>";
-	#	echo "<div class=\"session\">\n";
-	#	echo "<fieldset>\n";
+		// 1 - Admin
+		//	2 - SESS_ID
+		// 3 - Actions
+		// ...
 
-		// check if $name is in that list
-		$enrolled = array_search($name, $ulist);
-
-		if ($admin_mode == 1) {
+		if ($admin_mode) {
+			echo "<form method=\"post\" action=\"$PHP_SELF#jump$jump\" style='padding-top: 5px; padding-bottom: 0px; margin-bottom: 0px'>";
 			if ($session->active == "yes") {
 				echo "<td class='border' width='55' bgcolor='green' align='center'>Open</td><td class='border' width='95' align='center'>";
-			} else {
-				echo "<td class='border' width='55' bgcolor='red' align='center'>Closed</td><td class='border' width='95' align='center'>";
-			}
-			echo "<form method=\"post\" action=\"$PHP_SELF#jump$jump\" style='padding-top: 5px; padding-bottom: 0px; margin-bottom: 0px'>";
-
-			echo "<input type=\"hidden\" name=\"Name\" value=\"$name\">";
-			echo "<input type=\"hidden\" name=\"USID\" value=\"$USID\">";
-			echo "<input type='hidden' name='Context' value='editsession'>";
-			if ($session->active == "yes") {
 				echo "<button type='submit' name='Action' value='Close' alt='Close Session' title='Close Session' class='icon'><img src='icons/remove.png' class='icon'></button>";
 				echo "<button type='submit' name='Action' value='Edit' alt='Edit Session' title='Edit Session' class='icon'><img src='icons/edit.png' class='icon'></button>";
 			} else {
+				echo "<td class='border' width='55' bgcolor='red' align='center'>Closed</td><td class='border' width='95' align='center'>";
 				echo "<button type='submit' name='Action' value='Open' alt='Open Session' title='Open Session' class='icon'><img src='icons/add.png' class='icon'></button>";
 				echo "<button type='submit' name='Action' value='Edit' alt='Edit Session' title='Edit Session' class='icon'><img src='icons/edit.png' class='icon'></button>";
 				echo "<button type='submit' name='Action' value='Delete' alt='Delete Session' title='Delete Session' class='icon'><img src='icons/close.png' class='icon'></button>";
 			}
-			echo "</form>";
+			echo "<input type=\"hidden\" name=\"Name\" value=\"$name\">";
+			echo "<input type=\"hidden\" name=\"USID\" value=\"$USID\">";
+			echo "<input type='hidden' name='Context' value='editsession'>";
 			echo "</td>";
-		} else {
-			echo "<td class='border' class='border' width='130' align='center' valign='center'>";
+			echo "</form>";
+			if ($show_session_id) {
+				echo "<td class='border' width='26' align='center'>$USID</td>";
+			}
+		}
+		# Actions...
+		echo "<td class='border' class='border' width='100' align='center' valign='center'>";
+		if ($session->active == "yes") {
 			echo "<form method=\"post\" action=\"$PHP_SELF#jump$jump\" style=' padding-bottom: 0px; margin-bottom: 0px'>";
 			echo "<input type=\"hidden\" name=\"Name\" value=\"$name\">";
 			echo "<input type=\"hidden\" name=\"USID\" value=\"$USID\">";
-			if ($enrolled === FALSE) { // then not yet in list
-				if ($count >= $max) {
-					echo "<input type=\"submit\" value=\"Class is full\" disabled>";
-				} else {
-					if ($name == "") {
-						echo "<input type=\"submit\" value=\"Set your name\" disabled>";
-					} else {
+
+			if ($name === "") {
+				echo "<input type=\"submit\" value=\"Set your name\" disabled>";
+			} else {
+				if (array_search($name, $ulist) === FALSE) {	# if not enroled...
+					if ($count < $max) {
 						echo "<input style=\"background:lightgreen\" type=\"submit\" name='Action' value=\"Add Me\">";
+					} else {
+						echo "<input type=\"submit\" value=\"Class is full\" disabled>";
 					}
 				}
-	#		} else {
-	#			echo "<input style=\"background:red\" type=\"submit\" value=\"Remove me\" name=\"remove\">";
+				else {
+					echo "<input style=\"background:#FF4400\" type=\"submit\" name='Action' value=\"Remove Me\">";
+				}
 			}
 			echo "</form>\n";
-			echo "</td>";
 		}
-		if ($admin_mode) {
-			echo "$SESS_CELL";
-		}
-		echo "<td class='border' align='center' width='200'>";
-		echo $session->whenstr;
-//		echo $session->date . " at " . $session->time . "<br />\n";
 		echo "</td>";
-		echo "<td class='border' align='center' width='150'>";
-		echo $session->location . "<br />\n";
-		echo "</td>";
+		echo "<td class='border' align='center' width='200'>".$session->whenstr."</td>";
+		echo "<td class='border' align='center' width='150'>".$session->location."<br /></td>\n";
 
-$table_version = 3;
-if ($table_version == 2) {
-### version 2 --- div's to float left
-		print "<td><table class='sessionshaper'><tr><td style='padding: 0;margin:0'>\n";
-		for ($i = 0; $i < $max; $i ++) {
-//			print "<div class='boxme'>Item</div>";
-			if ($i < $count) {
-				if ($ulist[$i] == $name) {
-//					echo "<td width=\"80px\" align=\"center\" bgcolor='$mysquarecolor' style='padding: 0;margin:0'>";
-					print "<div class='boxme'>";
-					echo "$ulist[$i]";
-					echo "<form method=\"post\" action=\"$PHP_SELF#jump$jump\">";
-					echo "<input type=\"hidden\" name=\"Name\" value=\"$name\">";
-					echo "<input type=\"hidden\" name=\"USID\" value=\"$USID\">";
-					echo "<input style=\"background:red\" type=\"submit\" name='Action' value=\"Remove\">";
-					echo "</form>\n";
-				} else {
-					print "<div class='boxthem'>";
-//					echo "<td width=\"80px\" align=\"center\" bgcolor='$yoursquarecolor' style='padding: 0;margin:0'>";
-					echo "$ulist[$i]";
-				}
-			} else {
-				print "<div class='boxnone'>";
-//				echo "<td width=\"80px\" align=\"center\" bgcolor='$nonesquarecolor' style='padding: 0;margin:0'>";
-				echo "&nbsp;";
-			}
-			print "</div>\n";
-			if (($i+1) % $max_enrolments_per_line == 0) {
-				print "<br />";
-			}
-		}
-		print "</td></tr></table></td>\n";
-}
-else if ($table_version == 1) {
-## version 1 --- simple table
-		for ($i = 0; $i < $max; $i ++) {
-			if ($i < $count) {
-				if ($ulist[$i] == $name) {
-					echo "<td width=\"80px\" align=\"center\" bgcolor='$mysquarecolor' style='padding: 0;margin:0'>";
-					echo "$ulist[$i]";
-					echo "<form method=\"post\" action=\"$PHP_SELF#jump$jump\">";
-					echo "<input type=\"hidden\" name=\"Name\" value=\"$name\">";
-					echo "<input type=\"hidden\" name=\"USID\" value=\"$USID\">";
-					echo "<input style=\"background:red\" type=\"submit\" name='Action' value=\"Remove\">";
-					echo "</form>\n";
-				} else {
-					echo "<td width=\"80px\" align=\"center\" bgcolor='$yoursquarecolor' style='padding: 0;margin:0'>";
-					echo "$ulist[$i]";
-				}
-			} else {
-				echo "<td width=\"80px\" align=\"center\" bgcolor='$nonesquarecolor' style='padding: 0;margin:0'>";
-				echo "&nbsp;";
-			}
-			echo "</td>";
-		}
-}
-else if ($table_version == 3) {	# same as version 1 but make multiple rows using table rows.
-## version 1 --- simple table
+		# show session enrolments
 		print "<td class='sessionholder'><table class='sessionrows'><tr>\n";
 		for ($i = 0; $i < $max; $i ++) {
 			if ($i < $count) {
 				if ($ulist[$i] == $name) {
-#					echo "<td width=\"80px\" height='40' align=\"center\" bgcolor='$mysquarecolor' style='padding: 0;margin:0'>";
 					echo "<td class='sessionelement' bgcolor='$mysquarecolor'>";
 					echo "$ulist[$i]";
-					echo "<form method=\"post\" action=\"$PHP_SELF#jump$jump\">";
-					echo "<input type=\"hidden\" name=\"Name\" value=\"$name\">";
-					echo "<input type=\"hidden\" name=\"USID\" value=\"$USID\">";
-					echo "<input style=\"background:red\" type=\"submit\" name='Action' value=\"Remove\">";
-					echo "</form>\n";
+#					if ($session->active == "yes") {
+#						echo "<form method=\"post\" action=\"$PHP_SELF#jump$jump\">";
+#						echo "<input type=\"hidden\" name=\"Name\" value=\"$name\">";
+#						echo "<input type=\"hidden\" name=\"USID\" value=\"$USID\">";
+#						echo "<input type=\"submit\" name='Action' value=\"Remove Me\">";
+#						echo "</form>\n";
+#					}
 					echo "</td>";
 				} else {
-#					echo "<td width=\"80px\" align=\"center\" bgcolor='$yoursquarecolor' style='padding: 0;margin:0'>";
 					echo "<td class='sessionelement' bgcolor='$yoursquarecolor'>";
 					echo "$ulist[$i]";
+					if ($admin_mode and $session->active == "yes") {
+						echo "<form method=\"post\" action=\"$PHP_SELF#jump$jump\">";
+						echo "<input type=\"hidden\" name=\"Name\" value=\"$name\">";
+						echo "<input type=\"hidden\" name=\"Remove\" value=\"$ulist[$i]\">";
+						echo "<input type=\"hidden\" name=\"USID\" value=\"$USID\">";
+						echo "<input type=\"submit\" name='Action' value=\"AdminRemove\">";
+						echo "</form>\n";
+					}
 					echo "</td>";
 				}
 			} else {
-#				echo "<td width=\"80px\" align=\"center\" bgcolor='$nonesquarecolor' style='border: 0; padding: 0;margin:0'>";
 				echo "<td class='sessionelement' bgcolor='$nonesquarecolor'>";
 				echo "&nbsp;";
 				echo "</td>";
@@ -587,16 +531,10 @@ else if ($table_version == 3) {	# same as version 1 but make multiple rows using
 			}
 		}
 		$remainder = $max % $max_enrolments_per_line;
-#		print "<td>remainder = $remainder</td>\n";
 		if ($remainder > 0) {
 			print "<td>&nbsp;</td>\n";
 		}
 		print "</tr></table></td>";
-#			if (($i+1) % $max_enrolments_per_line == 0) {
-#				print "<br />";
-#			}
-}
-
 		echo "</tr>";
 		echo "</table>";
 	}
@@ -825,7 +763,7 @@ function print_notices($file) {
 	}
 	#echo "<fieldset><legend>Notices<legend>\n"; // this doesn't work on all platforms... so doing it manually...
 	echo '<div style="width:90%; padding-left:20px;">
-		<div style="width: 60px; position: relative; top: 0px; left: 20px; text-align: center; font-weight: bold; background: #ffffe0; padding:3px; border: 0px solid black; z-index: 1;">Notices</div>
+		<div style="width: 60px; position: relative; top: 0px; left: 20px; text-align: center; font-weight: bold; background: white; padding:3px; border: 0px solid black; z-index: 1;">Notices</div>
 		<div style="position: relative; top: -8px; border: 1px solid black; z-index: 0;">
 			<div style="padding-top:10px; padding-bottom:10px; padding-left:0px;">
 	';
