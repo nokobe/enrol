@@ -1,5 +1,5 @@
 <?php
-	$version = "version 2.3.2-exp";
+	$version = "version 2.3.2-exp.1";
 	$BASE = "./";
 	require_once $BASE.'includes/config.inc.php';
 	require_once $BASE.'includes/datetime.php';
