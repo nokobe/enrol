@@ -1,5 +1,5 @@
 <?php
-	$version = "version 2.3.2-exp.1";
+	$version = "version 2.3.2-exp.2";
 	$BASE = "./";
 	require_once $BASE.'includes/config.inc.php';
 	require_once $BASE.'includes/datetime.php';
@@ -276,7 +276,8 @@
 		$min = $_POST["sess_minute"];
 		$ampm = $_POST["sess_ampm"];
 		$timestamp = my_mktime($day, $mon, $year, $hour, $min, $ampm);
-		$timestring = date('g:ia l jS F', $timestamp);
+#		$timestring = date('g:ia l jS F', $timestamp);
+		$timestring = date('D d M y g:ia', $timestamp);
 		$session->when = $timestamp;
 		$session->whenstr = $timestring;
 		$session->location = $_POST["Location"];
@@ -476,7 +477,8 @@
 			echo "</form>\n";
 		}
 		echo "</td>";
-		echo "<td class='border' align='center' width='200'>".$session->whenstr."</td>";
+		$reformat = date('D d M y g:ia', getdate($session->whenstr));
+		echo "<td class='border' align='center' width='200'>".$reformat."</td>";
 		echo "<td class='border' align='center' width='150'>".$session->location."<br /></td>\n";
 
 		# show session enrolments

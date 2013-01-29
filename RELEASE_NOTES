@@ -1,3 +1,7 @@
+2.3.2-exp.2
+	begin bootstrap styling
+	reduce table chome. more compact date display. etc.
+
 2.3.2-exp.1
 	uses SESSION rather than cookie (uses cookie if "remember me" clicked)
 	uses top-bar for user login (no password required)
