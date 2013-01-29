@@ -1,5 +1,5 @@
 <?php
-	$version = "version 2.3.2-exp.2";
+	$version = "version 2.3.2-exp.3";
 	$BASE = "./";
 	require_once $BASE.'includes/config.inc.php';
 	require_once $BASE.'includes/datetime.php';
@@ -22,6 +22,8 @@
 	$SESSIONS_FILE = "data/".$config_sessions_data_file;
 	$NOTICES_FILE = "data/".$config_notices_file;
 	$EVENT_LOG = "data/".$config_log_file;
+
+	error_reporting(E_ALL);
 
 	date_default_timezone_set("Australia/Melbourne");
 
@@ -306,7 +308,7 @@
 	/* ======================= BEGIN MAIN PAGE ======================= */
 
 	print_header($TITLE, $version);
-	top_bar($TITLE);
+	top_bar($TITLE, "");
 	print_notices($NOTICES_FILE, $action == "Edit" ? 0 : $admin_mode);
 	print_refresh_button();
 	print_admin_toolbox($action == "Edit" ? 0 : $admin_mode);
@@ -402,7 +404,7 @@
 		$jump ++;
 		echo "<a name='jump$jump'></a>";
 		echo '<div class="'.($session->active == "yes" ? "openSession" : "closedSession").'">';
-		echo "<table>";
+		echo "<table class='table bordered'>";
 
 		// calculate if we need to print a weekly header:
 		// if this session is not in same week as prev session
@@ -412,15 +414,20 @@
 
 		if ($this_week_number != $prev_week_number) {
 			$mondaystr = weeknumber2monday($this_week_number, (int)$session->when);
+			echo <<<EOT
+<thead>
+Sessions for week starting $mondaystr</div>
+</thead>
+EOT;
 			echo "<div class='weeklyheader'>Sessions for week starting $mondaystr</div>\n";
-			echo "<tr bgcolor='$tableheadercolor'>";
-			if ($admin_mode) {
-				echo "<th class='border' colspan='2'>Administration</th>";
-				if ($show_session_id) {
-					echo "<th class='border'>ID</th>";
-				}
-			}
-			echo "<th class='border'>Actions</th><th class='border'>When</th><th class='border'>Location</th><th class='border' colspan=$max>Attendees</th></tr>\n";
+#			echo "<tr bgcolor='$tableheadercolor'>";
+#			if ($admin_mode) {
+#				echo "<th class='border' colspan='2'>Administration</th>";
+#				if ($show_session_id) {
+#					echo "<th class='border'>ID</th>";
+#				}
+#			}
+#			echo "<th class='border'>Actions</th><th class='border'>When</th><th class='border'>Location</th><th class='border' colspan=$max_enrolments_per_line>Attendees</th></tr>\n";
 		}
 		$prev_week_number = date("W", (int)$session->when);	// return value is a string, but we should be able to treat it as an integer.
 
@@ -454,50 +461,52 @@
 			}
 		}
 		# Actions...
-		echo "<td class='border' class='border' width='100' align='center' valign='center'>";
-		if ($session->active == "yes") {
-			echo "<form method=\"post\" action=\"$PHP_SELF#jump$jump\" style=' padding-bottom: 0px; margin-bottom: 0px'>";
-			echo "<input type=\"hidden\" name=\"Name\" value=\"$name\">";
-			echo "<input type=\"hidden\" name=\"USID\" value=\"$USID\">";
-
-			if ($name == "") {
-				echo "<input type=\"submit\" value=\"Log in first\" disabled>";
-			} else {
-				if (array_search($name, $ulist) === FALSE) {	# if not enroled...
-					if ($count < $max) {
-						echo "<input style=\"background:lightgreen\" type=\"submit\" name='Action' value=\"Add Me\">";
-					} else {
-						echo "<input type=\"submit\" value=\"Class is full\" disabled>";
-					}
-				}
-				else {
-					echo "<input style=\"background:#FF4400\" type=\"submit\" name='Action' value=\"Remove Me\">";
-				}
-			}
-			echo "</form>\n";
+#		echo "<td class='border' class='border' width='100' align='center' valign='center'>";
+#		if ($session->active == "yes") {
+#			echo "<form method=\"post\" action=\"$PHP_SELF#jump$jump\" style=' padding-bottom: 0px; margin-bottom: 0px'>";
+#			echo "<input type=\"hidden\" name=\"Name\" value=\"$name\">";
+#			echo "<input type=\"hidden\" name=\"USID\" value=\"$USID\">";
+#
+#			if ($name == "") {
+#				echo "<input type=\"submit\" value=\"Log in first\" disabled>";
+#			} else {
+#				if (array_search($name, $ulist) === FALSE) {	# if not enroled...
+#					if ($count < $max) {
+#						echo "<input style=\"background:lightgreen\" type=\"submit\" name='Action' value=\"Add Me\">";
+#					} else {
+#						echo "<input type=\"submit\" value=\"Class is full\" disabled>";
+#					}
+#				}
+#				else {
+#					echo "<input style=\"background:#FF4400\" type=\"submit\" name='Action' value=\"Remove Me\">";
+#				}
+#			}
+#			echo "</form>\n";
+#		}
+#		echo "</td>";
+		$year = date('Y', (int)$session->when);
+		$thisyear = date('Y');
+		if ($year == $thisyear) {
+			$reformat = date('D d M \a\t g:ia', (int)$session->when);
+		} else {
+			$reformat = date('D d M Y \a\t g:ia', (int)$session->when);
 		}
-		echo "</td>";
-		$reformat = date('D d M y g:ia', getdate($session->whenstr));
+
 		echo "<td class='border' align='center' width='200'>".$reformat."</td>";
 		echo "<td class='border' align='center' width='150'>".$session->location."<br /></td>\n";
 
 		# show session enrolments
-		print "<td class='sessionholder'><table class='sessionrows'><tr>\n";
-		for ($i = 0; $i < $max; $i ++) {
+		print "<td class='sessionholder'><table class='table sessionrows'><tr>\n";
+		for ($i = 0; $i < $max_enrolments_per_line; $i ++) {
 			if ($i < $count) {
 				if ($ulist[$i] == $name) {
 					echo "<td class='sessionelement' bgcolor='$mysquarecolor'>";
+#					echo "<td class='sessionelement occupied' bgcolor='$mysquarecolor'>";
 					echo "$ulist[$i]";
-#					if ($session->active == "yes") {
-#						echo "<form method=\"post\" action=\"$PHP_SELF#jump$jump\">";
-#						echo "<input type=\"hidden\" name=\"Name\" value=\"$name\">";
-#						echo "<input type=\"hidden\" name=\"USID\" value=\"$USID\">";
-#						echo "<input type=\"submit\" name='Action' value=\"Remove Me\">";
-#						echo "</form>\n";
-#					}
 					echo "</td>";
 				} else {
 					echo "<td class='sessionelement' bgcolor='$yoursquarecolor'>";
+#					echo "<td class='sessionelement occupied' bgcolor='$yoursquarecolor'>";
 					echo "$ulist[$i]";
 					if ($admin_mode and $session->active == "yes") {
 						echo "<div class=\"adminFunction\">\n";
@@ -505,20 +514,28 @@
 						echo "<input type=\"hidden\" name=\"Name\" value=\"$name\">";
 						echo "<input type=\"hidden\" name=\"Remove\" value=\"$ulist[$i]\">";
 						echo "<input type=\"hidden\" name=\"USID\" value=\"$USID\">";
-						echo "<input type=\"submit\" name='Action' value=\"AdminRemove\">";
+#						echo "<input type=\"submit\" name='Action' value=\"AdminRemove\">";
+						echo "<i class='icon-trash'></i>";
 						echo "</form>\n";
 						echo "</div>\n";
 					}
 					echo "</td>";
 				}
-			} else {
+			} else if ($i < $max) { # empty slot
 				echo "<td class='sessionelement' bgcolor='$nonesquarecolor'>";
+#				echo "<td class='sessionelement free' bgcolor='$nonesquarecolor'>";
+				echo "&nbsp;";
+						echo "<i class='icon-plus'></i>";
+				echo "</td>";
+			} else { # disabled (not a spot...just a placeholder)
+				echo "<td class='sessionelement' bgcolor='#efe'>";
+#				echo "<td class='sessionelement disabled' bgcolor='#efe'>";
 				echo "&nbsp;";
 				echo "</td>";
 			}
-			if (($i+1) % $max_enrolments_per_line == 0) {
-				print "</tr><tr>";
-			}
+#			if (($i+1) % $max_enrolments_per_line == 0) {
+#				print "</tr><tr>";
+#			}
 		}
 		$remainder = $max % $max_enrolments_per_line;
 		if ($remainder > 0) {
@@ -705,9 +722,12 @@ function print_header($title, $version) {
 <head>
 <title>$title</title>
 <link rel="stylesheet" type="text/css" href="css/style.css" />
+<link rel="stylesheet" href="css/bootstrap.min.css" type="text/css" media="screen" title="no title" charset="utf-8">
+<link rel="stylesheet" href="css/bootstrap-responsive.min.css" type="text/css" media="screen" title="no title" charset="utf-8">
 <script type='text/javascript' src="js/showhide.js"></script>
 </head>
 <body>
+<div class="container">
 EOT;
 }
 
@@ -731,6 +751,10 @@ function print_footer() {
 	} else {
 		echo "<div class='footer'>&bull; enrol (version $version) by mbates &bull; </div>";
 	}
+	echo <<<EOT
+<script src="js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+EOT;
+	echo "</div>";
 	echo "</body></html>\n";
 } // end: print_footer
 
@@ -813,6 +837,7 @@ function top_bar($title, $breadcrumb) {
 	global $user;
 	global $admin_mode;
 
+	$BREAD = "";
 	if ($breadcrumb != "") {
 		$BREAD = " > $breadcrumb ";
 	}

@@ -1,3 +1,8 @@
+2.3.2-exp.3
+	removed style.css
+	added bootstrap styling links
+	starting building template
+
 2.3.2-exp.2
 	begin bootstrap styling
 	reduce table chome. more compact date display. etc.

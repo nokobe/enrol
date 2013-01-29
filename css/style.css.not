@@ -269,3 +269,7 @@ button.icon {
 	background-color: transparent;
 	border: 0;
 }
+
+.icon-trash {
+	float: right;
+}

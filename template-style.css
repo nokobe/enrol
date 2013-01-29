@@ -1,0 +1,43 @@
+h3 {
+	float: left; 
+	width: 50%;
+	font-size: 1.5em;
+	margin: 0;
+	padding: 0;
+	line-height: 40px;
+}
+
+div.info {
+	float: right;
+	width: 49%;
+	text-align: right;
+	line-height: 40px;
+}
+
+.attendance {
+	width: 960px;
+	clear: both;
+}
+
+td.place {
+	border: 1px solid #ddd;
+	min-height: 3em;
+	vertical-align: top;
+	width: 20%;
+}
+td.self {
+	background-color: lightgreen;
+}
+
+.free {
+	background-color: #ab8;
+	color: #fff;
+}
+
+.disabled {
+	visibility: hidden;
+}
+
+.icon-trash {
+	float: right;
+}
