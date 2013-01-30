@@ -1,3 +1,8 @@
+2.3.2-exp.3 (version not updated as only new templates have changed)
+	basically a nice checkpoint in the template design.
+	Looks quite good. Template responds to values such as $loggedIn
+	and $admin (probably should be called $isLoggedIn and $isAdmin)
+
 2.3.2-exp.3
 	removed style.css
 	added bootstrap styling links

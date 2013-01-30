@@ -1,9 +1,24 @@
+html, body {
+	height: 100%;	/* required for footer - html and body elements cannot have any padding or margin */
+}
+
+body {
+	padding-top: 55px;
+}
+
 h3 {
 	float: left; 
-	width: 50%;
+	width: 40%;
 	font-size: 1.5em;
 	margin: 0;
 	padding: 0;
+	line-height: 40px;
+}
+
+div.status {
+	float: left;
+	width: 10%;
+	text-align: center;
 	line-height: 40px;
 }
 
@@ -15,7 +30,8 @@ div.info {
 }
 
 .attendance {
-	width: 960px;
+/*	width: 960px;*/
+	width: 100%;
 	clear: both;
 }
 
@@ -34,10 +50,14 @@ td.self {
 	color: #fff;
 }
 
-.disabled {
+td.disabled {
 	visibility: hidden;
 }
 
 .icon-trash {
 	float: right;
+}
+
+div.adminView{
+	margin: 5px;
 }
