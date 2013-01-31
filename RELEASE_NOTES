@@ -1,3 +1,22 @@
+2.3.2-exp.4 mid-dev version. old-style works. template-style not complete
+	reworked many things! including...
+	- put all the start crud into a global.inc
+	- eliminate globals by using a config class (though at times the
+	  config itself is accessed as a global - unless until I finish
+	  my proper ConfigurationManager
+	  (except for "admin_mode" which is still in the process of being
+	  replaced by calls to SessionMgr class)
+	- created SessionMgr to track user login, session and cookie info
+	  and encapsulate it. Must now come here to check username of logged
+	  in user, etc.
+	- since SessionMgr is now tracking the user, removed obsolete
+	  hidden Name field from all the forms
+	- eliminated redundant (and confusing) session->whenstr. All times a session date 
+	  needs to be presented, it is cast at the time.
+	- yes, I did change the base indent-level of much of the code in enrol.php.
+	  Sorry about that.
+	- eliminated silly "save changes" return parameter when LOADING session file
+
 2.3.2-exp.3 (version not updated as only new templates have changed)
 	basically a nice checkpoint in the template design.
 	Looks quite good. Template responds to values such as $loggedIn

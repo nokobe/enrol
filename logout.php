@@ -1,14 +1,10 @@
 <?php
 
-session_start();
-$user = $_SESSION['user'];
-$PHP_SELF = htmlentities($_SERVER['PHP_SELF']);
+require 'includes/sessionMgr.php';
 
-$_SESSION['user'] = "";
-session_destroy();
-if (isset($_COOKIE['EnrolName'])) {
-	setcookie('EnrolName', '', time()-3600);
-}
+session_start();
+SessionMgr::checkForSessionOrLoginOrCookie();
+SessionMgr::logout();
 
 if (file_exists("enrol.php")) {
 	header("Location: enrol.php");
