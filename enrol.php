@@ -269,7 +269,7 @@ if ($save_changes == 1) {
 	$t->adminView = SessionMgr::get('adminView');
 	$t->hideClosedSessions = SessionMgr::get('hideClosedSessions');
 
-	$t->notices = "hello";
+	$t->notices = get_notices($u->get('notices_file'), SessionMgr::isRegisteredAdmin() and SessionMgr::get('adminView'));
 	$t->self = $c->get('php_self');
 	$t->sessions = prepareSessionData($xml);
 	require "templates/main.php";
@@ -723,6 +723,45 @@ EOT;
 	echo "</div>";
 	echo "</body></html>\n";
 } // end: print_footer
+
+function get_notices($file, $showEditButton) {
+	global $c;
+
+	$results = "";
+
+	$tainted = file_get_contents($file);
+	$notices = strip_tags($tainted, "<a><font>");
+	$lines = explode ("\n", $notices);
+	$results .= '<div style="width:90%; padding-left:20px;">
+		<div style="width: 60px; position: relative; top: 0px; left: 20px; text-align: center; font-weight: bold; background: white; padding:3px; border: 0px solid black; z-index: 1;">Notices</div>
+		<div style="position: relative; top: -8px; border: 1px solid black; z-index: 0;">
+			<div style="padding-top:10px; padding-bottom:10px; padding-left:0px;">
+	';
+
+	$results .= "<ul>\n";
+	foreach ( $lines as $line ) {
+		if (preg_match('/^\s*$/', $line)) {
+			$results .= "<li>&nbsp;";
+		} else {
+			$results .= "<li><img src='icons/bullet.gif' alt='-' border='0'> $line\n";
+		}
+	}
+	$results .= "</ul>\n";
+	if ($showEditButton == 1) {
+		if ($notices != $tainted) { # something was stripped out!
+			$results .= "<font class='securityalert'>SECURITY NOTICE : disallowed html tags found in Notices</font>\n";
+		}
+		$results .= "<div class=\"adminFunction\">\n";
+		$self = $c->get('php_self');
+		$results .= "<form method=\"post\" action=\"$self\">";
+		$results .= "<input type=\"hidden\" name='Context' value=\"notices\">";
+		$results .= "&nbsp;&nbsp;<input type=\"submit\" name='Action' value=\"Edit\">";
+		$results .= "</form>";
+		$results .= "</div>";
+	}
+	$results .= "</div></div></div>\n";
+	return $results;
+} // end: get_notices
 
 function print_notices($file, $showEditButton) {
 	global $c;

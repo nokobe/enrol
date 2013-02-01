@@ -1,0 +1,1 @@
+rsync $* -avuz --exclude="*.swp" --exclude="data" --exclude="*.git" --exclude="dev" --exclude="testing" --exclude="deploy.*" . ~/Sites/EnrolDemo

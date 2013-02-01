@@ -19,7 +19,7 @@ echo <<<EOT
 
     <!-- begin NAV BAR -->
 
-    <div class="navbar navbar-fixed-top">
+    <div class="navbar navbar-fixed-top navbar-inverse">
       <div class="navbar-inner">
         <div class="container">
 		<a class="brand" href="#">$t->title</a>

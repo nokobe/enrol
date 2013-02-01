@@ -1,11 +1,14 @@
 <?php
 require "templates/header.php";
-echo "<pre>";
-echo "Session:";
-print_r($_SESSION);
-echo "Post:";
-print_r($_POST);
-echo "</pre>";
+if ($c->get('debug')) {
+	echo "<pre>";
+	echo "Session:";
+	print_r($_SESSION);
+	echo "Post:";
+	print_r($_POST);
+	echo "</pre>";
+}
+
 if ($t->isAdmin) {
 	if ($t->adminView) {
 		# show adminview "toggle" as ON

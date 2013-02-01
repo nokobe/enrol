@@ -1,3 +1,9 @@
+version 2.3.2-exp.6 changed colours. shows notices. added debug CI
+	- trying different colour scheme
+	- added get_notices() (makes print_notices() obsolete
+	- added debug configuration value and hide some ugly debug prints behind it
+	- added file: deploy.830d
+
 version 2.3.2-exp.5 working template-based layout and showing class enrolments
 	added prepareSessionData() to prepare data for the template to display
 	added a bunch of functions to handle class operations..

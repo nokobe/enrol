@@ -7,7 +7,8 @@ body {
 }
 
 div.sessioninfo {
-	float: left; 
+	float: left;
+	color: #A1745F;
 /*	width: 40%;*/
 	font-size: 1.5em;
 	font-weight: bold;
@@ -43,12 +44,12 @@ td.place {
 	width: 20%;
 }
 td.self {
-	background-color: lightgreen;
+	background-color: #C0D997;
 }
 
 .free {
-	background-color: #ab8;
-	color: #fff;
+	background-color: #EEF5C1;
+	color: black;
 }
 
 td.disabled {
