@@ -6,7 +6,7 @@ require_once 'includes/sessionMgr.php';
 require_once 'includes/ConfigClass.php';
 
 $c = new ConfigClass; /* system configuration */
-$c->set('version', "version 2.3.2-exp.4");
+$c->set('version', "version 2.3.2-exp.5");
 $c->set('php_self', htmlentities($_SERVER['PHP_SELF']));
 $c->set('php_base', getBaseURL($_SERVER));
 $c->set('logfmt_date', 'd/m/Y:G:i:s O'); /* was UPPER */

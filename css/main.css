@@ -6,10 +6,11 @@ body {
 	padding-top: 55px;
 }
 
-h3 {
+div.sessioninfo {
 	float: left; 
-	width: 40%;
+/*	width: 40%;*/
 	font-size: 1.5em;
+	font-weight: bold;
 	margin: 0;
 	padding: 0;
 	line-height: 40px;
@@ -22,9 +23,9 @@ div.status {
 	line-height: 40px;
 }
 
-div.info {
+div.sessionops {
 	float: right;
-	width: 49%;
+/*	width: 49%;*/
 	text-align: right;
 	line-height: 40px;
 }

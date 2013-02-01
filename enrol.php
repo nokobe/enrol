@@ -1,31 +1,22 @@
 <?php
 
 require_once 'includes/global.php';
+$status = array();			// for sending alerts to the user
 
 /* ======================= READ POST INPUT ======================= */
 
-$submit = @$_POST["submit"];
-$add = @$_POST["add"];
-$remove = @$_POST["remove"];
-$open = @$_POST["Open"];
-$close = @$_POST["Close"];
-$edit_notices = @$_POST["Edit"];
-
 $action = @$_POST["Action"];
 $context = @$_POST["Context"];
-
 log_debug("action = $action context = $context");
 
-$status = array();
-
-/* ======================= SET NAME and ADMIN_MODE--- FROM COOKIE IF POSSIBLE/NECESSARY ======================= */
 /* =======================  HANDLE Login/Session/Cookie =======================  */
 
 session_start();
 SessionMgr::checkForSessionOrLoginOrCookie();
-$admin_mode = SessionMgr::hasAdminAuth();
-$admin_mode = SessionMgr::isRegisteredAdmin();
 
+# this admin_mode code should be converted to calls to SessionMgr::admin_stuff()
+#$admin_mode = SessionMgr::hasAdminAuth();
+$admin_mode = SessionMgr::isRegisteredAdmin();
 log_debug("admin_mode is currently : $admin_mode");
 
 $save_changes = 0;
@@ -82,7 +73,7 @@ if ($context == "notices") {
 	$save_changes = 1;
 
 	$when = date($c->get('logfmt_date'), (int)$newsession->when);
-	log_event("created new session (ID = $xml->usid, Time = $when, Location = $newsession->location)");
+	log_event("created new session (ID = $xml->nextID, Time = $when, Location = $newsession->location)");
 } else if ($action == "Add Me") {
 	$USID = $_POST["USID"];
 	if ($USID == "") {
@@ -164,9 +155,8 @@ if ($context == "notices") {
 	$USID = $_POST["USID"];
 	$sessionarray = $xml->xpath("/sessions/session[usid=$USID]");
 	$session = $sessionarray[0];
-	
-	$save_changes = 1;
 	$session->active = "yes";
+	$save_changes = 1;
 	$when = date($c->get('logfmt_date'), (int)$session->when);
 	log_event("opened session (ID = $USID, Time = $when , Location $session->location)");
 } else if ($action == "Close") {
@@ -277,10 +267,11 @@ if ($save_changes == 1) {
 
 	$t->isAdmin = SessionMgr::isRegisteredAdmin();
 	$t->adminView = SessionMgr::get('adminView');
-	$t->viewClosedSessions = SessionMgr::get('viewClosedSessions');
+	$t->hideClosedSessions = SessionMgr::get('hideClosedSessions');
 
 	$t->notices = "hello";
 	$t->self = $c->get('php_self');
+	$t->sessions = prepareSessionData($xml);
 	require "templates/main.php";
 	exit(0);
 
@@ -345,15 +336,8 @@ if ($save_changes == 1) {
 
 	// sort data
 	$sortthis = $xml->xpath('/sessions/session');
-	function sort_sessions($a, $b) {
-		if ((int)$a->when == (int)$b->when) {
-			return 0;
-		}
-		return ((int)$a->when < (int)$b->when) ? -1 : 1;
-	}
-	usort($sortthis, 'sort_sessions');
+	usort($sortthis, 'sort_sessions_by_time');
 
-	// NEED TO SORT THIS BY THE WHEN (timestamp) FIELD
 	$available = 0;
 	$total = count($sortthis);
 	$prev_week_number = -1;	// initial value must be invalid
@@ -871,6 +855,117 @@ EOT;
 		echo '</div>';
 		echo "<br />";
 		echo "</fieldset>\n";
+	}
+}
+
+function sort_sessions_by_time($a, $b) {
+	if ((int)$a->when == (int)$b->when) {
+		return 0;
+	}
+	return ((int)$a->when < (int)$b->when) ? -1 : 1;
+}
+
+# SessionMgr::hasAdminAuth();
+# SessionMgr::isRegisteredAdmin();
+# SessionMgr::get('adminView');
+# SessionMgr::get('hideClosedSessions');
+
+function prepareSessionData($xml) {
+	$x = array();
+	$allSessions = $xml->xpath('/sessions/session');
+	usort($allSessions, 'sort_sessions_by_time');
+	foreach ($allSessions as $s) {
+		if ($s->active != 'yes' and (!SessionMgr::isRegisteredAdmin() or !SessionMgr::get('adminView'))) {
+			continue;
+		}
+		if (SessionMgr::get('hideClosedSessions') and $s->active != 'yes') {
+			continue;
+		}
+
+		$xo = new stdClass;
+		$xo->usid = (int)$s->usid;
+		$xo->when = displayDate($s->when);
+		$xo->location = (string)$s->location;
+		$xo->classSize = classSize($s);
+		$xo->maxClassSize = (int)$s->maxusers;
+
+		$isActive = $s->active == "yes";
+		$user = SessionMgr::getUsername();
+
+		$xo->sessionStatus = "";
+		$xo->sessionops = array();
+		if (SessionMgr::isRegisteredAdmin() and SessionMgr::get('adminView')) {
+			$xo->sessionStatus = $isActive ?
+			       	'<button class="btn btn-small btn-success disabled" type=button name="Action" value="opensession">Open</button>'
+				: '<button class="btn btn-small btn-danger disabled" type=button name="Action" value="opensession">Closed</button>';
+			if (!$isActive) { $xo->sessionops[] = '<button class="btn btn-small btn-link" type=button>Open Session</button>'; }
+			$xo->sessionops[] = '<button class="btn btn-small btn-link" type=button>Edit Session</button>';
+			if ($isActive) { $xo->sessionops[] = '<button class="btn btn-small btn-link" type=button>Close Session</button>'; }
+			if (!$isActive) { $xo->sessionops[] = '<button class="btn btn-small btn-link" type=button>Delete Session</button>'; }
+		}
+		if ($isActive and SessionMgr::isLoggedIn()) {
+			if (userIsEnrolled($user, $s)) {
+				$xo->sessionops[] = '<button class="btn btn-small btn-danger" type=button>Un-enrol</button>'; 
+			} else {
+				if (!classIsFull($s)) {
+					 $xo->sessionops[] = '<button class="btn btn-small btn-success" type=button>enrol</button>';
+				}
+			}
+		}
+		$xo->users = array();
+		foreach (enrolled($s) as $who) {
+			if ($who == $user) {
+#				$xo->users[] = '<td class="place occupied self">$who <i class="icon-trash"></i></td>';
+				$xo->users[] = "<td class='place occupied self'>$who</td>";
+			} else {
+				$xo->users[] = "<td class='place occupied'>$who</td>";
+			}
+		}
+#		print "<pre>";
+#		print_r($xo);
+#		print "</pre>";
+
+		$x[] = $xo;
+	}
+	return $x;
+}
+
+function userIsEnrolled($user, $s) {
+	if ($s->userlist == "") {
+		return 0;
+	}
+	$users = explode("|", $s->userlist);
+	return array_search($user, $users);
+}
+
+function classSize($s) {
+	if ($s->userlist == "") {
+		return 0;
+	}
+	return count(explode("|", $s->userlist));
+}
+
+function classIsFull($s) {
+	return $s->maxusers == classSize($s);
+}
+
+function enrolled($s) {
+	if ($s->userlist == "") {
+		return array();
+	}
+	return explode("|", $s->userlist);
+}
+
+/*
+ * return nicely formated date
+ */
+function displayDate($timestamp) {
+	$year = date('Y', (int) $timestamp);
+	$thisyear = date('Y');
+	if ($year == $thisyear) {
+		return date('D d M \a\t g:ia', (int)$timestamp);
+	} else {
+		return date('D d M Y \a\t g:ia', (int)$timestamp);
 	}
 }
 

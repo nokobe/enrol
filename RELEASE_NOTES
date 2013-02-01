@@ -1,3 +1,10 @@
+version 2.3.2-exp.5 working template-based layout and showing class enrolments
+	added prepareSessionData() to prepare data for the template to display
+	added a bunch of functions to handle class operations..
+	and threatened to write a SessionsClass class but it's too
+	bit a change to commit to at this point, thought it would
+	certainly help simplify many of the sessions operations!.
+
 2.3.2-exp.4 mid-dev version. old-style works. template-style not complete
 	reworked many things! including...
 	- put all the start crud into a global.inc
