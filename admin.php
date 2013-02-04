@@ -1,6 +1,6 @@
 <?php
 
-require 'includes/sessionMgr.php';
+require 'includes/SessionMgr.Class.php';
 
 session_start();
 SessionMgr::checkForSessionOrLoginOrCookie();

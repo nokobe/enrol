@@ -75,14 +75,18 @@ foreach ($t->sessions as $s) {
 						$s->sessionStatus
 					</div>
 					<div class="sessionops">
+						<form method="post" action="manageSessions.php">
 EOS;
 	foreach ($s->sessionops as $button) {
 		echo $button;
 	}
 	echo <<<EOS
+							<!-- <input name="sessionID" value="$s->usid"> -->
+							<input type="hidden" name="USID" value="$s->usid">
+						</form>
 					</div>
 				</div>
-				<table class="attendance table-bordered" border="0" cellspacing="5" cellpadding="5">
+				<table class="attendance table-bordered table-condensed" border="0" cellspacing="5" cellpadding="5">
 EOS;
 	$index = 0;
 	echo "<tr>";
@@ -91,7 +95,7 @@ EOS;
 			echo $s->users[$i];
 		}
 		else {
-			echo '<td class="place free">Free <i class="icon-plus pull-right"></i></td>';
+		echo '<td class="place free"><div class="muted"><small><i>Available</i></small></div></td>';
 		}
 		if (($i+1) % 5 == 0 and $i < $s->maxClassSize) {
 			echo "</tr>";
@@ -101,7 +105,6 @@ EOS;
 	echo "</tr>";
 	echo <<<EOS
 				</table>
-				<input type="hidden" name="USID" value="$s->usid">
 				<br />
 EOS;
 }
@@ -227,5 +230,5 @@ echo <<<EOF
 
 EOF;
 require 'templates/footer.php';
-# vim:filetype=html
+# vim:filetype=html:ts=2:sw=2
 ?>

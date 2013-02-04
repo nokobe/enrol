@@ -2,15 +2,16 @@
 require_once 'includes/config.inc.php';
 require_once 'includes/datetime.php';
 require_once 'includes/functions.php';
-require_once 'includes/sessionMgr.php';
-require_once 'includes/ConfigClass.php';
+require_once 'includes/SessionMgr.Class.php';
+require_once 'includes/Config.Class.php';
+require_once 'includes/ManageSessions.Class.php';
 
 $c = new ConfigClass; /* system configuration */
 $c->set('version', "version 2.3.2-exp.6");
 $c->set('php_self', htmlentities($_SERVER['PHP_SELF']));
 $c->set('php_base', getBaseURL($_SERVER));
 $c->set('logfmt_date', 'd/m/Y:G:i:s O'); /* was UPPER */
-$c->set('debug', 0);
+$c->set('debug', 1);
 
 $u = new ConfigClass; /* user configuration */
 $u->set('title', $config_title); /* was UPPER */

@@ -63,3 +63,7 @@ td.disabled {
 div.adminView{
 	margin: 15px;
 }
+
+form {
+	margin: 0px 0px 0px 0px;
+}

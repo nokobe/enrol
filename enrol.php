@@ -24,7 +24,8 @@ $xml = load_sessions_file($u->get('sessions_file'));
 
 /* {{ ======================= BEGIN: HANDLE ACTIONS ======================= */
 
-if ($context == "notices") {
+if ($action == "edit-notices") {
+#if ($context == "notices") 
 	if ($action == "Edit") {
 		print_header($u->title, $c->get('version'));
 		top_bar($u->title, "Edit Notices");
@@ -74,7 +75,7 @@ if ($context == "notices") {
 
 	$when = date($c->get('logfmt_date'), (int)$newsession->when);
 	log_event("created new session (ID = $xml->nextID, Time = $when, Location = $newsession->location)");
-} else if ($action == "Add Me") {
+} else if ($action == "enrol") {
 	$USID = $_POST["USID"];
 	if ($USID == "") {
 		die("missing USID");
@@ -98,7 +99,7 @@ if ($context == "notices") {
 		$when = date($c->get('logfmt_date'), (int)$session->when);
 		log_event("enrolled in session (ID = $USID, Time = $when, Location = $session->location)");
 	}
-} else if ($action == "Remove Me") {
+} else if ($action == "unenrol") {
 	$USID = $_POST["USID"];
 	if ($USID == "") {
 		die("missing USID");
@@ -178,7 +179,8 @@ if ($context == "notices") {
 	} else {
 		print "<h2>Error: attempt to reset SessionID when there are still sessions</h2>";
 	}
-} else if ($action == "Edit" and $context == "editsession" ) {
+#} else if ($action == "Edit" and $context == "editsession" ) {
+} else if ($action == "edit-session") {
 	print_header($u->get('title'), $c->get('version'));
 	top_bar($u->get('title'), "Edit Session");
 
@@ -606,80 +608,6 @@ function delete_session($id, $xml) {
 	return $xml;
 } // end: delete_session
 
-function print_datetime_selection($ts) {
-
-	// get date and time and put in as defaults
-	if ($ts != "") {
-		$tsa = getdate($ts);
-		$now = getdate();
-	} else {
-		$tsa = getdate();
-		$now = $tsa;
-	}
-
-	$hours = $tsa["hours"];
-	$ampm = "AM";
-	$min = $tsa["minutes"];
-//	// calculate minute to nearest 10 minute mark
-//	$min = round($min / 10) * 10;
-//	change to ... nearest 15 minute mark
-	$min = round($min / 15) * 15;
-	if ($min == 60) {
-		$hours ++;
-		$min = 0;
-	}
-	if ($hours > 12) {
-		$hours -= 12;
-		$ampm = "PM";
-	}
-	if ($hours == 12) {
-		$ampm = "PM";
-	}
-	if ($hours == 0) {
-		$hours = 12;
-		$ampm = "AM";
-	}
-
-/*
-	print "
-	<table>
-	<tr><td>Year</td><td>Month</td><td>Day</td><td>Hour</td><td>Minute</td></tr>
-	<tr>
-	";
-	print "<td>";
-*/
-	echo createDays('sess_day', $tsa["mday"]);
-/*
-	print "</td>";
-	print "<td>";
-*/
-	echo createMonths('sess_month', $tsa["mon"]);
-/*
-	print "</td>";
-	print "<td>";
-*/
-	echo createYears($now["year"], $now["year"] + 1, 'sess_year', $tsa["year"]);
-/*
-	print "</td>";
-	print "<td>";
-*/
-	echo createHours('sess_hour', $hours);
-/*
-	print "</td>";
-	print "<td>";
-*/
-	echo createMinutes('sess_minute', $min);
-/*
-	print "</td>";
-	print "<td>";
-*/
-	echo createAmPm('sess_ampm', $ampm);
-/*
-	print "</td>";
-	print "</tr>";
-	print "</table>";
-*/
-} // end print_datetime_selection
 
 function print_header($title, $version) {
 	print <<<EOT
@@ -811,19 +739,6 @@ function log_event($text) {
 	fclose($fh);
 }
 
-function log_debug($text) {
-	global $c;
-
-	$DEBUG_LOG = "data/debug.log";
-
-	$t = time();
-	$ts = date($c->get('logfmt_date'));
-	$fh = fopen($DEBUG_LOG, 'a') or die("can't open $DEBUG_LOG");
-	$ip = $_SERVER['REMOTE_ADDR'];
-	fwrite($fh, $ts. " ".$ip." : ".$text. "\n");
-	fclose($fh);
-}
-
 function my_mktime($day, $mon, $year, $hour, $min, $ampm) {
 	if ($ampm == "PM" and $hour != 12) {
 		$hour += 12;
@@ -937,17 +852,18 @@ function prepareSessionData($xml) {
 			$xo->sessionStatus = $isActive ?
 			       	'<button class="btn btn-small btn-success disabled" type=button name="Action" value="opensession">Open</button>'
 				: '<button class="btn btn-small btn-danger disabled" type=button name="Action" value="opensession">Closed</button>';
-			if (!$isActive) { $xo->sessionops[] = '<button class="btn btn-small btn-link" type=button>Open Session</button>'; }
-			$xo->sessionops[] = '<button class="btn btn-small btn-link" type=button>Edit Session</button>';
-			if ($isActive) { $xo->sessionops[] = '<button class="btn btn-small btn-link" type=button>Close Session</button>'; }
-			if (!$isActive) { $xo->sessionops[] = '<button class="btn btn-small btn-link" type=button>Delete Session</button>'; }
+
+			if (!$isActive) { $xo->sessionops[] = '<button class="btn btn-small btn-link" type="submit" name="Action" value="open-session">Open Session</button>'; }
+			$xo->sessionops[] = '<button class="btn btn-small btn-link" type="submit" name="Action" value="edit-session">Edit Session</button>';
+			if ($isActive) { $xo->sessionops[] = '<button class="btn btn-small btn-link" type="submit" name="Action" value="close-session">Close Session</button>'; }
+			if (!$isActive) { $xo->sessionops[] = '<button class="btn btn-small btn-link" type="submit" name="Action" value="delete-session">Delete Session</button>'; }
 		}
 		if ($isActive and SessionMgr::isLoggedIn()) {
 			if (userIsEnrolled($user, $s)) {
-				$xo->sessionops[] = '<button class="btn btn-small btn-danger" type=button>Un-enrol</button>'; 
+				$xo->sessionops[] = '<button class="btn btn-small btn-danger" type="submit" name="Action" value="unenrol">Un-enrol</button>'; 
 			} else {
 				if (!classIsFull($s)) {
-					 $xo->sessionops[] = '<button class="btn btn-small btn-success" type=button>enrol</button>';
+					 $xo->sessionops[] = '<button class="btn btn-small btn-success" type="submit" name="Action" value="enrol">enrol</button>';
 				}
 			}
 		}

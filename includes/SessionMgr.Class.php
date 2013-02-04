@@ -1,6 +1,18 @@
 <?php
 
-// This class uses PHP_SESSION info and/or cookies to manage the user session
+/*
+ * SessionMgr: use PHP_SESSION info and/or cookies to manage the user session
+ * Provides:
+ *	isLoggedIn()
+ *	getUsername()
+ *	isRegisteredAdmin()
+ *	hasAdminAuth()
+ *	login($name, $setCookie)
+ *	checkForSessionOrLoginOrCookie()
+ *	logout()
+ *	get($var)
+ *	set($var, $value)
+ */
 
 class SessionMgr {
 	function isLoggedIn() {

@@ -1,5 +1,22 @@
 <?php
 
+/*
+ * Sessions: manage the Enrol (class) sessions data
+ *
+ * Provides:
+ *	debugDump()	- prints the currently loads xml sessions file
+ *	load()		- load the sessions (called by the constructor)
+ *	save()		- throws exception if save fails
+ *	getSession($sid)	- NYI
+ *	addSession($sid)	- NYI
+ *	removeSession($sid)	- NYI
+ *	getAttr($sid, $attr)	- NYI
+ *	setAttr($sid, $array)	- NYI
+ *	addUser($sid, $name)	- NYI
+ *	rmUser($sid, $name)	- NYI
+ * 	
+ */
+
 class Sessions {
 	protected $xml;
 	protected $datafile;
@@ -10,6 +27,8 @@ class Sessions {
 		$this->nextID = -1;
 		$this->xml = "";
 		$this->lastMod = "";
+
+		$this->load();
 	}
 
 	function debugDump() {
@@ -32,14 +51,11 @@ class Sessions {
 				die("but die anyway\n");
 			}
 		}
+		// SORT!
 		$this->lastMod = filemtime($this->datafile);
 
 		// NOTE: load file and get file mod time really should be an ATOMIC operation
 	}
-
-	/*
-	 * throws exception if save fails
-	 */
 
 	function save() {
 		if (filemtime($this->datafile) != $this->lastMod) {
@@ -53,6 +69,11 @@ class Sessions {
 		if (! $this->xml->asXML( $this->datafile )) {
 		       	throw new Exception("Unable to save Sessions file");
 		}
+	}
+
+	function getSession($sid) {
+		list($s) = $this->xml->xpath("/sessions/session[usid=$sid]");
+		return $s;
 	}
 
 	function addSession($sid) {
