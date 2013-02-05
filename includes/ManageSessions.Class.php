@@ -4,16 +4,17 @@
  * Sessions: manage the Enrol (class) sessions data
  *
  * Provides:
- *	debugDump()	- prints the currently loads xml sessions file
- *	load()		- load the sessions (called by the constructor)
- *	save()		- throws exception if save fails
+ *	debugDump()		- prints the currently loads xml sessions file
+ *	load()			- load the sessions (called by the constructor)
+ *	save()			- throws exception if save fails
+ * NYI	getSessions()		- get all sessions (sorted by time)
  *	getSession($sid)	- NYI
  *	addSession($sid)	- NYI
  *	removeSession($sid)	- NYI
  *	getAttr($sid, $attr)	- NYI
  *	setAttr($sid, $array)	- NYI
- *	addUser($sid, $name)	- NYI
- *	rmUser($sid, $name)	- NYI
+ *	enrolUser($sid, $name)	- NYI
+ *	unenrolUser($sid, $name)- NYI
  * 	
  */
 
@@ -29,6 +30,13 @@ class Sessions {
 		$this->lastMod = "";
 
 		$this->load();
+	}
+
+	private function sort_sessions_by_time($a, $b) {
+		if ((int)$a->when == (int)$b->when) {
+			return 0;
+		}
+		return ((int)$a->when < (int)$b->when) ? -1 : 1;
 	}
 
 	function debugDump() {
@@ -86,12 +94,75 @@ class Sessions {
 	}
 	
 	function setAttr($sid, $array) {
+		$s = $this->getSession($sid);
+		foreach ($array as $key => $value) {
+			$s->$key = $value;
+			log_debug("Set Attr: $key => $value");
+		}
 	}
 
-	function addUser($sid, $name) {
+	/*
+	 * throws Exception on failure
+	 */
+	function enrolUser($sid, $name) {
+		$s = $this->getSession($sid);
+		if ($this->isUserEnrolled($s, $name)) {
+			throw new Exception('already enrolled');
+		}
+		if ($this->isClassFull($s)) {
+			throw new Exception('class is full');
+		}
+		$who = $this->getEnrolled($s);
+		$who[] = $name;
+		$s->userlist = implode('|', $who);
+
+	//	$when = date('d/m/Y:G:i:s O', (int)$s->when);
+	//	log_event("enrolled in session (ID = $sid, Time = $when, Location = $s->location)");
 	}
 
-	function rmUser($sid, $name) {
+	/*
+	 * throws Exception on failure
+	 */
+	function unenrolUser($sid, $name) {
+		$s = $this->getSession($sid);
+		if (! $this->isUserEnrolled($s, $name)) {
+			throw new Exception('not enrolled');
+		}
+		$who = $this->getEnrolled($s);
+		if ($who === FALSE) {
+			throw new Exception("couldn't find $name in $who");
+		}
+		log_debug("ok. unenrol $name from $sid");
+		$index = array_search($name, $who);
+		unset ( $who[$index] );
+		log_debug("unsetting who[$index]");
+		$s->userlist = implode('|', $who);
+	}
+
+	function isUserEnrolled($session, $user) {
+		if ($session->userlist == "") {
+			return FALSE;
+		}
+		$users = explode("|", $session->userlist);
+		return array_search($user, $users) === FALSE ? FALSE : TRUE;
+	}
+
+	function getClassSize($session) {
+		if ($session->userlist == "") {
+			return 0;
+		}
+		return count(explode("|", $session->userlist));
+	}
+
+	function isClassFull($session) {
+		return $session->maxusers == $this->getClassSize($session);
+	}
+
+	function getEnrolled($session) {
+		if ($session->userlist == "") {
+			return array();
+		}
+		return explode("|", $session->userlist);
 	}
 }
 

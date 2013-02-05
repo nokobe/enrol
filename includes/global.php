@@ -7,11 +7,11 @@ require_once 'includes/Config.Class.php';
 require_once 'includes/ManageSessions.Class.php';
 
 $c = new ConfigClass; /* system configuration */
-$c->set('version', "version 2.3.2-exp.6");
+$c->set('version', "version 2.3.2-exp.7");
 $c->set('php_self', htmlentities($_SERVER['PHP_SELF']));
 $c->set('php_base', getBaseURL($_SERVER));
 $c->set('logfmt_date', 'd/m/Y:G:i:s O'); /* was UPPER */
-$c->set('debug', 1);
+$c->set('debug', 0);
 
 $u = new ConfigClass; /* user configuration */
 $u->set('title', $config_title); /* was UPPER */

@@ -22,7 +22,7 @@ echo <<<EOT
     <div class="navbar navbar-fixed-top navbar-inverse">
       <div class="navbar-inner">
         <div class="container">
-		<a class="brand" href="#">$t->title</a>
+		<a class="brand" href="enrol.php">$t->title</a>
 		<ul class="nav nav-pills">
 		<li><a href="#information" data-toggle="tab">Info</a></li>
 		<li class="active"><a href="#sessions" data-toggle="tab">Sessions</a></li>

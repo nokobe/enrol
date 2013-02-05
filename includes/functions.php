@@ -1,4 +1,5 @@
 <?php
+
 function getBaseURL($SERVER_HASH) {
 	if (isset($SERVER_HASH['HTTP_HOST'])) {
 		$host = $SERVER_HASH['HTTP_HOST'];
@@ -25,20 +26,46 @@ function errorPage($errorMessage) {
 	$t->errorMessage = $errorMessage;
 
 	require 'templates/errorPage.php';
+	die();
 }
 
 function log_debug($text) {
 	global $c;
 
 	$DEBUG_LOG = "data/debug.log";
+	$LOGFMT_DATE = 'd/m/Y:G:i:s O';
 
 	$t = time();
-	$ts = date($c->get('logfmt_date'));
+//	$ts = date($c->get('logfmt_date'));
+	$ts = date($LOGFMT_DATE);
 	$fh = fopen($DEBUG_LOG, 'a') or die("can't open $DEBUG_LOG");
 	$ip = $_SERVER['REMOTE_ADDR'];
 	fwrite($fh, $ts. " ".$ip." : ".$text. "\n");
 	fclose($fh);
 }
+
+/*
+ * return nicely formated date
+ */
+function displayDate($timestamp) {
+	$year = date('Y', (int) $timestamp);
+	$thisyear = date('Y');
+	if ($year == $thisyear) {
+		return date('D d M \a\t g:ia', (int)$timestamp);
+	} else {
+		return date('D d M Y \a\t g:ia', (int)$timestamp);
+	}
+}
+
+function my_mktime($day, $mon, $year, $hour, $min, $ampm) {
+	if ($ampm == "PM" and $hour != 12) {
+		$hour += 12;
+	} else if ($ampm == "AM" and $hour == 12) {
+		$hour -= 12;
+	}
+	return mktime($hour, $min, 0, $mon, $day, $year);
+}
+//		int mktime  ([  int $hour = date("H")  [,  int $minute = date("i")  [,  int $second = date("s")  [,  int $month = date("n")  [,  int $day = date("j")  [,  int $year = date("Y")  [,  int $is_dst = -1  ]]]]]]] )
 
 function print_datetime_selection($ts) {
 
@@ -74,45 +101,37 @@ function print_datetime_selection($ts) {
 		$ampm = "AM";
 	}
 
-/*
-	print "
-	<table>
-	<tr><td>Year</td><td>Month</td><td>Day</td><td>Hour</td><td>Minute</td></tr>
-	<tr>
-	";
-	print "<td>";
-*/
+	echo '<div class="control-group">';
+	echo '<label class="control-label">Day of month</label>';
+	echo '<div class="controls">';
 	echo createDays('sess_day', $tsa["mday"]);
-/*
-	print "</td>";
-	print "<td>";
-*/
+	echo '</div></div>';
+
+	echo '<div class="control-group">';
+	echo '<label class="control-label">Month</label>';
+	echo '<div class="controls">';
 	echo createMonths('sess_month', $tsa["mon"]);
-/*
-	print "</td>";
-	print "<td>";
-*/
+	echo '</div></div>';
+	echo '<div class="control-group">';
+	echo '<label class="control-label">Year</label>';
+	echo '<div class="controls">';
 	echo createYears($now["year"], $now["year"] + 1, 'sess_year', $tsa["year"]);
-/*
-	print "</td>";
-	print "<td>";
-*/
+	echo '</div></div>';
+	echo '<div class="control-group">';
+	echo '<label class="control-label">Hour</label>';
+	echo '<div class="controls">';
 	echo createHours('sess_hour', $hours);
-/*
-	print "</td>";
-	print "<td>";
-*/
+	echo '</div></div>';
+	echo '<div class="control-group">';
+	echo '<label class="control-label">Minute</label>';
+	echo '<div class="controls">';
 	echo createMinutes('sess_minute', $min);
-/*
-	print "</td>";
-	print "<td>";
-*/
+	echo '</div></div>';
+	echo '<div class="control-group">';
+	echo '<label class="control-label"></label>';
+	echo '<div class="controls">';
 	echo createAmPm('sess_ampm', $ampm);
-/*
-	print "</td>";
-	print "</tr>";
-	print "</table>";
-*/
+	echo '</div></div>';
 } // end print_datetime_selection
 
 ?>

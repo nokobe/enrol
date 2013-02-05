@@ -8,7 +8,9 @@ body {
 
 div.sessioninfo {
 	float: left;
-	color: #A1745F;
+/*	color: #A1745F;*/
+/*	color: green;*/
+	color: #72BA58;
 /*	width: 40%;*/
 	font-size: 1.5em;
 	font-weight: bold;
@@ -41,15 +43,31 @@ td.place {
 	border: 1px solid #ddd;
 	min-height: 3em;
 	vertical-align: top;
-	width: 20%;
+	width: 16%;
 }
+
+td.occupied {
+	color: #040;
+/*	background-color: #C0D997;*/
+	background-color: #C0C997;
+}
+
 td.self {
-	background-color: #C0D997;
+	color: black;
+/*	background-color: #C0D997;*/
+	background-color: #72BA58;
 }
 
 .free {
+	/*
 	background-color: #EEF5C1;
 	color: black;
+	*/
+/*	background-color: #EFC;*/
+/*	background-color: #E9FFE2;*/
+	background-color: #DADCDA;
+	color: #DED;
+
 }
 
 td.disabled {

@@ -1,3 +1,17 @@
+version 2.3.2-exp.7 major dev checkpoint. most functions implmented
+	- color adjustments
+	- moved some functions into central "functions.php" file
+	- fix buttons to open and close sessions
+	- implemented enrol and unenrol user in manageSessions Class
+	- implemented open and close session functions is manageSessions Class
+	- implemented edit session
+	- protected username display with htmlentities()
+	- cleaned/simplified functions in datetime.php
+	- fixed: class places weren't all displaying correctly
+	   (well, mostly fixed. I think it now adds an unnecessary row
+	   if the number of places is mod 6)
+
+
 version 2.3.2-exp.6 changed colours. shows notices. added debug CI
 	- trying different colour scheme
 	- added get_notices() (makes print_notices() obsolete

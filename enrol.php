@@ -94,7 +94,6 @@ if ($action == "edit-notices") {
 	} else {
 		$enrolled_list[] = SessionMgr::getUsername();
 		$session->userlist = implode( "|", $enrolled_list);
-#			$status[] = "Added you to session $ID";
 		$save_changes = 1;
 		$when = date($c->get('logfmt_date'), (int)$session->when);
 		log_event("enrolled in session (ID = $USID, Time = $when, Location = $session->location)");
@@ -263,7 +262,7 @@ if ($save_changes == 1) {
 	$t = new stdClass;
 	$t->title = $u->get('title');
 	$t->base = ".";
-	$t->username = SessionMgr::getUsername();
+	$t->username = htmlentities(SessionMgr::getUsername());
 	$t->loggedIn = SessionMgr::isLoggedIn();
 	$t->admin = SessionMgr::hasAdminAuth();
 
@@ -739,16 +738,6 @@ function log_event($text) {
 	fclose($fh);
 }
 
-function my_mktime($day, $mon, $year, $hour, $min, $ampm) {
-	if ($ampm == "PM" and $hour != 12) {
-		$hour += 12;
-	} else if ($ampm == "AM" and $hour == 12) {
-		$hour -= 12;
-	}
-	return mktime($hour, $min, 0, $mon, $day, $year);
-}
-//		int mktime  ([  int $hour = date("H")  [,  int $minute = date("i")  [,  int $second = date("s")  [,  int $month = date("n")  [,  int $day = date("j")  [,  int $year = date("Y")  [,  int $is_dst = -1  ]]]]]]] )
-
 function top_bar($title, $breadcrumb) {
 	global $c;
 
@@ -812,22 +801,18 @@ EOT;
 	}
 }
 
-function sort_sessions_by_time($a, $b) {
-	if ((int)$a->when == (int)$b->when) {
-		return 0;
-	}
-	return ((int)$a->when < (int)$b->when) ? -1 : 1;
-}
-
 # SessionMgr::hasAdminAuth();
 # SessionMgr::isRegisteredAdmin();
 # SessionMgr::get('adminView');
 # SessionMgr::get('hideClosedSessions');
 
 function prepareSessionData($xml) {
+	global $c, $u;
+
 	$x = array();
 	$allSessions = $xml->xpath('/sessions/session');
 	usort($allSessions, 'sort_sessions_by_time');
+	$sessions = new Sessions($u->get('sessions_file'));
 	foreach ($allSessions as $s) {
 		if ($s->active != 'yes' and (!SessionMgr::isRegisteredAdmin() or !SessionMgr::get('adminView'))) {
 			continue;
@@ -843,6 +828,8 @@ function prepareSessionData($xml) {
 		$xo->classSize = classSize($s);
 		$xo->maxClassSize = (int)$s->maxusers;
 
+		$xo->numelements = ( intval( $xo->maxClassSize / 6) + 1) * 6;
+
 		$isActive = $s->active == "yes";
 		$user = SessionMgr::getUsername();
 
@@ -853,10 +840,10 @@ function prepareSessionData($xml) {
 			       	'<button class="btn btn-small btn-success disabled" type=button name="Action" value="opensession">Open</button>'
 				: '<button class="btn btn-small btn-danger disabled" type=button name="Action" value="opensession">Closed</button>';
 
-			if (!$isActive) { $xo->sessionops[] = '<button class="btn btn-small btn-link" type="submit" name="Action" value="open-session">Open Session</button>'; }
-			$xo->sessionops[] = '<button class="btn btn-small btn-link" type="submit" name="Action" value="edit-session">Edit Session</button>';
-			if ($isActive) { $xo->sessionops[] = '<button class="btn btn-small btn-link" type="submit" name="Action" value="close-session">Close Session</button>'; }
-			if (!$isActive) { $xo->sessionops[] = '<button class="btn btn-small btn-link" type="submit" name="Action" value="delete-session">Delete Session</button>'; }
+			if (!$isActive) { $xo->sessionops[] = '<button class="btn btn-small" type="submit" name="Action" value="open-session">Open Session</button>'; }
+			$xo->sessionops[] = '<button class="btn btn-small" type="submit" name="Action" value="edit-session">Edit Session</button>';
+			if ($isActive) { $xo->sessionops[] = '<button class="btn btn-small" type="submit" name="Action" value="close-session">Close Session</button>'; }
+			if (!$isActive) { $xo->sessionops[] = '<button class="btn btn-small" type="submit" name="Action" value="delete-session">Delete Session</button>'; }
 		}
 		if ($isActive and SessionMgr::isLoggedIn()) {
 			if (userIsEnrolled($user, $s)) {
@@ -871,9 +858,9 @@ function prepareSessionData($xml) {
 		foreach (enrolled($s) as $who) {
 			if ($who == $user) {
 #				$xo->users[] = '<td class="place occupied self">$who <i class="icon-trash"></i></td>';
-				$xo->users[] = "<td class='place occupied self'>$who</td>";
+				$xo->users[] = "<td class='place occupied self'>".htmlentities($who)."</td>";
 			} else {
-				$xo->users[] = "<td class='place occupied'>$who</td>";
+				$xo->users[] = "<td class='place occupied'>".htmlentities($who)."</td>";
 			}
 		}
 #		print "<pre>";
@@ -890,7 +877,7 @@ function userIsEnrolled($user, $s) {
 		return 0;
 	}
 	$users = explode("|", $s->userlist);
-	return array_search($user, $users);
+	return array_search($user, $users) === FALSE ? FALSE : TRUE;
 }
 
 function classSize($s) {
@@ -911,17 +898,12 @@ function enrolled($s) {
 	return explode("|", $s->userlist);
 }
 
-/*
- * return nicely formated date
- */
-function displayDate($timestamp) {
-	$year = date('Y', (int) $timestamp);
-	$thisyear = date('Y');
-	if ($year == $thisyear) {
-		return date('D d M \a\t g:ia', (int)$timestamp);
-	} else {
-		return date('D d M Y \a\t g:ia', (int)$timestamp);
+function sort_sessions_by_time($a, $b) {
+	if ((int)$a->when == (int)$b->when) {
+		return 0;
 	}
+	return ((int)$a->when < (int)$b->when) ? -1 : 1;
 }
+
 
 ?>

@@ -6,7 +6,7 @@ echo '<div class="well">';
 echo htmlentities($t->errorMessage);
 echo '</div>';
 
-EOT;
+echo '<a href="enrol.php">Return to enrol home</a>';
 
 require 'templates/footer.php';
 # vim:filetype=html:ts=2:sw=2

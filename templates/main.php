@@ -10,10 +10,10 @@ if ($c->get('debug')) {
 }
 
 if ($t->isAdmin) {
+	echo '<form class="form-inline" method="post" action="admin.php">';
 	if ($t->adminView) {
 		# show adminview "toggle" as ON
 		echo <<<EOT
-		<form class="form-inline" method="post" action="admin.php">
 		<label>Admin View</label>
 		<div class="btn-group adminView">
 		<button class="btn btn-success disabled">On</button>
@@ -28,7 +28,6 @@ EOT;
 			<button class="btn btn-success disabled">On</button>
 			<button class="btn" name="hideClosedSessions" value="0">Off</button>
 			</div>
-			</form>
 EOF;
 		} else {
 			# OFF
@@ -38,7 +37,6 @@ EOF;
 			<button class="btn" name="hideClosedSessions" value="1">On</button>
 			<button class="btn btn-danger disabled">Off</button>
 			</div>
-			</form>
 EOF;
 		}
 	} else {
@@ -52,6 +50,7 @@ EOF;
 		</div>
 EOT;
 	}
+	echo '</form>';
 }
 echo <<<EOF
 	<div class="tabbable"> <!-- Only required for left/right tabs -->
@@ -66,10 +65,9 @@ echo <<<EOF
 EOF;
 foreach ($t->sessions as $s) {
 	echo <<<EOS
-				<!-- SESSION TEMPLATE -->
 				<div class="heading">
 					<div class="sessioninfo">
-						$s->when - $s->location
+						$s->when - $s->location ($s->maxClassSize places)
 					</div>
 					<div class="status">
 						$s->sessionStatus
@@ -79,6 +77,7 @@ foreach ($t->sessions as $s) {
 EOS;
 	foreach ($s->sessionops as $button) {
 		echo $button;
+		echo "&nbsp;";
 	}
 	echo <<<EOS
 							<!-- <input name="sessionID" value="$s->usid"> -->
@@ -90,14 +89,17 @@ EOS;
 EOS;
 	$index = 0;
 	echo "<tr>";
-	for ($i = 0; $i < $s->maxClassSize; $i++) {
+	for ($i = 0; $i < $s->numelements; $i++) {
 		if ($i < $s->classSize) {
 			echo $s->users[$i];
 		}
-		else {
-		echo '<td class="place free"><div class="muted"><small><i>Available</i></small></div></td>';
+		else if ( $i < $s->maxClassSize ) {
+			echo '<td class="place free"><div class="muted"><small>Available</small></div></td>';
 		}
-		if (($i+1) % 5 == 0 and $i < $s->maxClassSize) {
+		else {
+			echo '<td class="place disabled"><div class="muted"><small>Available</small></div></td>';
+		}
+		if (($i+1) % 6 == 0 and $i < $s->maxClassSize) {
 			echo "</tr>";
 			echo "<tr>";
 		}
@@ -109,118 +111,6 @@ EOS;
 EOS;
 }
 echo <<<EOF
-				<!-- END SESSION TEMPLATE -->
-
-				<!-- begin the big long list of sessions!! -->
-<!--
-				<div class="well well-small">Sessions for week starting Monday 14th January</div>
-				<div class="heading">
-					<h3>
-					3 Feb at 4pm - ITS Building
-					</h3>
-					<div class="status">
-						<button class="btn btn-small btn-success disabled" type=button>Open</button>
-					</div>
-					<div class="info">
-						<button class="btn btn-small btn-link" type=button>Open Session</button>
-						<button class="btn btn-small btn-link" type=button>Edit Session</button>
-						<button class="btn btn-small btn-link" type=button>Close Session</button>
-						<button class="btn btn-small btn-link" type=button>Delete Session</button>
-					</div>
-				</div>
-				<table class="attendance table-bordered" border="0" cellspacing="5" cellpadding="5">
-					<tr>
-						<td class="place occupied self">Mark <i class="icon-trash"></i></td>
-						<td class="place occupied">Rod <i class="icon-trash"></i></td>
-						<td class="place occupied">Yogi <i class="icon-trash"></i></td>
-						<td class="place occupied">Michael <i class="icon-trash"></i></td>
-						<td class="place occupied">Charlie <i class="icon-trash"></i></td>
-					</tr>
-					<tr>
-						<td class="place occupied">Guy <i class="icon-trash"></i></td>
-						<td class="place occupied">Andrew <i class="icon-trash"></i></td>
-						<td class="place occupied">Raena <i class="icon-trash"></i></td>
-						<td class="place occupied">Jo <i class="icon-trash"></i></td>
-						<td class="place free">Free <i class="icon-plus pull-right"></i></td>
-					</tr>
-					<tr>
-						<td class="place free">
-						free
-						</td>
-						<td class="place free">
-						free
-						</td>
-						<td class="place disabled"></td>
-						<td class="place disabled"></td>
-						<td class="place disabled"></td>
-					</tr>
-				</table>
-				<br />
-				<div class="heading">
-					<h3>
-					3 Feb at 4pm - ITS Building
-					</h3>
-					<div class="status">
-						<button class="btn btn-small btn-danger disabled" type=button>Closed</button>
-					</div>
-					<div class="info">
--->
-						<!--
-						<button class="btn btn-small btn-success" type=button>Enrol</button>
-						-->
-<!--
-						<button class="btn btn-small btn-link" type=button>Enrol</button>
-					</div>
-				</div>
-				<table class="attendance" border="0" cellspacing="5" cellpadding="5">
-					<tr>
-					<td class="place occupied">
-					Mark
-					</td>
-					<td class="place occupied">
-					Rod
-					</td>
-					<td class="place occupied">
-					Yogi
-					</td>
-					<td class="place occupied">
-					Michael
-					</td>
-					<td class="place occupied">
-					Charlie
-					</td>
-					</tr>
-					<tr>
-					<td class="place occupied">
-					Guy
-					</td>
-					<td class="place occupied">
-					Andrew
-					</td>
-					<td class="place occupied">
-					Raena
-					</td>
-					<td class="place occupied">
-					Jo
-					</td>
-					<td class="place free">
-					Free
-					</td>
-					</tr>
-					<tr>
-					<td class="place free">
-					free
-					</td>
-					<td class="place free">
-					free
-					</td>
-					<td class="place disabled"></td>
-					<td class="place disabled"></td>
-					<td class="place disabled"></td>
-					</tr>
-				</table>
--->
-				<!-- end the list of sessions -->
 			</div>
 			<div class="tab-pane" id="admin">
 				Some admin content
