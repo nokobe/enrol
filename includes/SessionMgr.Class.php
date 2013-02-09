@@ -12,6 +12,8 @@
  *	logout()
  *	get($var)
  *	set($var, $value)
+ *	storeMessage($msg)
+ *	getMessage( )
  */
 
 class SessionMgr {
@@ -34,7 +36,7 @@ class SessionMgr {
 	function isRegisteredAdmin() {
 		global $config_admin_users;
 
-		if (!SessionMgr::isLoggedIn()) {
+		if (SessionMgr::isLoggedIn() === FALSE) {
 			return 0;
 		}
 		return in_array($_SESSION['user'], $config_admin_users);
@@ -45,6 +47,13 @@ class SessionMgr {
 			return 0;
 		}
 		return $_SESSION['admin_auth'] === 1;
+	}
+
+	function grantAdminAuth() {
+		if (SessionMgr::isLoggedIn() === FALSE) {
+			return 0;
+		}
+		$_SESSION['admin_auth'] = 1;
 	}
 
 	function login($name, $setCookie) {
@@ -100,6 +109,23 @@ class SessionMgr {
 
 	function set($var, $value) {
 		$_SESSION[$var] = $value;
+	}
+
+	function storeMessage($message) {
+		$_SESSION["messages"][] = $message;
+		file_put_contents("data/debug.log", "stored message: $message", FILE_APPEND | LOCK_EX);
+	}
+
+	function getMessage() {
+		if (isset($_SESSION["messages"])) {
+			$type = gettype($_SESSION["messages"]);
+			if (gettype($_SESSION["messages"]) == "array") {
+				file_put_contents("data/debug.log", "yes", FILE_APPEND | LOCK_EX);
+				return array_shift( $_SESSION["messages"] );
+			} else {
+				file_put_contents("data/debug.log", "no. it's a $type", FILE_APPEND | LOCK_EX);
+			}
+		}
 	}
 }
 

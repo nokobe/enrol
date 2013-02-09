@@ -1,12 +1,15 @@
 <?php
 require "templates/header.php";
 
-echo "<h2>We're sorry but an error has occured</h2>";
-echo '<div class="well">';
-echo htmlentities($t->errorMessage);
-echo '</div>';
+echo <<<EOT
+<h2>We're sorry but an error has occured</h2>
+<div class="well">
+$t->errorMessage
+</div>
 
-echo '<a href="enrol.php">Return to enrol home</a>';
+<a href="$t->home">Home</a>
+
+EOT;
 
 require 'templates/footer.php';
 # vim:filetype=html:ts=2:sw=2

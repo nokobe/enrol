@@ -1,4 +1,12 @@
 <?php
+/* this template requires:
+ *	$t->title
+ *	$t->base
+ *	$t->loggedIn
+ *	$t->username
+ *	$t->loginpost
+ */
+
 echo <<<EOT
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <html lang="en-US">
@@ -22,7 +30,7 @@ echo <<<EOT
     <div class="navbar navbar-fixed-top navbar-inverse">
       <div class="navbar-inner">
         <div class="container">
-		<a class="brand" href="enrol.php">$t->title</a>
+		<a class="brand" href="$t->home">$t->title</a>
 		<ul class="nav nav-pills">
 		<li><a href="#information" data-toggle="tab">Info</a></li>
 		<li class="active"><a href="#sessions" data-toggle="tab">Sessions</a></li>
@@ -38,7 +46,7 @@ if ($t->loggedIn) {
 EOT;
 } else {
 	echo <<<EOT
-		<form class="navbar-form form-inline pull-right" method="post" action="$t->self">
+		<form class="navbar-form form-inline pull-right" method="post" action="$t->loginpost">
 		<input type="text" class="span2" placeholder="Enter Your Name" name="Name" value="$t->username">
 		<button type="submit" class="btn" name="submit-login" value="Sign In">Sign in</button>
 		<label class="checkbox">

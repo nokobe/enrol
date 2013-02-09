@@ -1,4 +1,13 @@
 <?php
+/*
+ * this template requires:
+ *		$t->isAdmin
+ *		$t->adminView
+ *		$t->hideClosedSessions
+ *		$t->notices
+ *		$t->sessions
+ */
+
 require "templates/header.php";
 if ($c->get('debug')) {
 	echo "<pre>";
@@ -39,10 +48,13 @@ EOF;
 			</div>
 EOF;
 		}
+		echo <<<LINE
+		&nbsp; &nbsp;
+		<a href="createSession.php" class="btn btn-small" type="submit" name="Action" value="create-session">Create New Session</a>
+LINE;
 	} else {
 		# show adminview "toggle" as OFF
 		echo <<<EOT
-		<form class="form-inline" method="post" action="admin.php">
 		<label>Admin View</label>
 		<div class="btn-group adminView">
 		<button class="btn" name="adminView" value="1">On</button>

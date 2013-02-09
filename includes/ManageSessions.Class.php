@@ -7,14 +7,18 @@
  *	debugDump()		- prints the currently loads xml sessions file
  *	load()			- load the sessions (called by the constructor)
  *	save()			- throws exception if save fails
- * NYI	getSessions()		- get all sessions (sorted by time)
- *	getSession($sid)	- NYI
- *	addSession($sid)	- NYI
- *	removeSession($sid)	- NYI
+ * $sessions = getSessions($sid)	- get all sessions (sorted by time)
+ * $obj = getSession($sid)	- return the session object
+ * $sid = addSession()	- NYI
+ *	removeSession($sid)	- etc
  *	getAttr($sid, $attr)	- NYI
- *	setAttr($sid, $array)	- NYI
- *	enrolUser($sid, $name)	- NYI
- *	unenrolUser($sid, $name)- NYI
+ *	setAttr($sid, $array)	- set the attributes in the given session
+ *	enrolUser($sid, $name)	- enrol user in given session
+ *	unenrolUser($sid, $name)	- unenrol user in given session
+ *	isUserEnrolled($session, $user)	- etc
+ *	getClassSize($session)	- etc
+ *	isClassFull($session)	- etc
+ *	getEnrolled($session)	- etc
  * 	
  */
 
@@ -25,7 +29,6 @@ class Sessions {
 
 	function __construct($file) {
 		$this->datafile = $file;
-		$this->nextID = -1;
 		$this->xml = "";
 		$this->lastMod = "";
 
@@ -84,10 +87,31 @@ class Sessions {
 		return $s;
 	}
 
-	function addSession($sid) {
+	function addSession($attributes) {
+		$newID = (int) $this->xml->nextID;
+		$new = $this->xml->addChild('session');
+		$new->addChild("usid", $newID);
+		$new->addChild("active", $attributes["active"]);
+		$new->addChild("when", $attributes["when"]);
+		$new->addChild("location", $attributes["location"]);
+		$new->addChild("maxusers", $attributes["maxusers"]);
+		$this->xml->nextID = $newID + 1;
 	}
 
 	function removeSession($sid) {
+		// ==================== convert to DOM ====================
+		$dom = new DOMDocument();
+		$dom->loadXML($this->xml->asXML());
+
+		// ==================== select the session to delete ====================
+		$xpath = new DomXpath($dom);
+		$session = $xpath->query("//sessions/session[usid=$sid]");
+
+		// ==================== delete element ====================
+		$session->item(0)->parentNode->removeChild($session->item(0));
+
+		// ==================== convert back to XML object ====================
+		$this->xml = new SimpleXMLElement($dom->saveXML());
 	}
 
 	function getAttr($sid, $attr) {

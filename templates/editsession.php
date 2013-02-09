@@ -1,14 +1,6 @@
 <?php
 require "templates/header.php";
 
-if ($c->get('debug')) {
-	echo "<pre>";
-	echo "Session:";
-	print_r($_SESSION);
-	echo "Post:";
-	print_r($_POST);
-	echo "</pre>";
-}
 $sid = $t->s->usid;
 $loc = $t->s->location;
 $whenTS = (float) $t->s->when;
@@ -37,7 +29,7 @@ echo <<<EOT
 	</div></div>
 		<br />
 		<br />
-		<button type="submit" class="btn" name="Action" value="cancel-edit-session">Cancel</button>
+		<button type="submit" class="btn" name="Action" value="cancel">Cancel</button>
 		<button type="submit" class="btn btn-success" name="Action" value="save-edit-session">Save</button>
 		</form>
 EOT;

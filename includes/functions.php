@@ -16,13 +16,7 @@ function errorPage($errorMessage) {
 	session_start();
 	SessionMgr::checkForSessionOrLoginOrCookie();
 
-	$t = new stdClass;
-	$t->title = $u->get('title');
-	$t->base = ".";
-	$t->username = SessionMgr::getUsername();
-	$t->loggedIn = SessionMgr::isLoggedIn();
-	$t->self = $c->get('php_self');
-
+	$t = prepareTemplateEssentials();
 	$t->errorMessage = $errorMessage;
 
 	require 'templates/errorPage.php';
@@ -133,5 +127,25 @@ function print_datetime_selection($ts) {
 	echo createAmPm('sess_ampm', $ampm);
 	echo '</div></div>';
 } // end print_datetime_selection
+
+function prepareTemplateEssentials() {
+	global $u, $c;
+	$t = new stdClass;
+
+	# add header and footer essentials
+
+	$t->title = $u->get('title');
+	$t->base = ".";
+	$t->loggedIn = SessionMgr::isLoggedIn();
+	$t->username = SessionMgr::getUsername();
+	$t->loginpost = $c->get('index');
+	$t->home = $c->get('index');
+
+	# add footer essentials
+
+	$t->version = $c->get('version');
+
+	return $t;
+}
 
 ?>

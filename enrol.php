@@ -33,7 +33,7 @@ if ($action == "edit-notices") {
 		print_notices($FILE, $action == "Edit" ? 0 : $admin_mode);
 		$notices = file_get_contents($FILE);
 		echo "Editing: $FILE" . ":<br />";
-		$self = $c->get('php_self');
+		$self = SERVER::get('PHP_SELF');
 		echo "<form method=\"post\" action=\"$self\">";
 		echo "<textarea name=\"newnotices\" cols=160 rows=20>$notices</textarea>";
 		echo "<p>\n";
@@ -61,7 +61,6 @@ if ($action == "edit-notices") {
 	$hour = $_POST["sess_hour"];
 	$min = $_POST["sess_minute"];
 	$ampm = $_POST["sess_ampm"];
-//		print "<h4>timestamp = my_mktime($day, $mon, $year, $hour, $min, $ampm)</h4>\n";
 	$timestamp = my_mktime($day, $mon, $year, $hour, $min, $ampm);
 	$newsession = $xml->addChild('session');
 	$newsession->addChild("usid", (int)$xml->nextID);
@@ -186,7 +185,7 @@ if ($action == "edit-notices") {
 	$USID = $_POST["USID"];
 	$sessionarray = $xml->xpath("/sessions/session[usid=$USID]");
 	$session = $sessionarray[0];
-	$self = $c->get('php_self');
+	$self = SERVER::get('PHP_SELF');
 	print "<fieldset>
 		<legend>Edit Session (SessionID: $USID)</legend>
 		<form method=\"post\" action=\"$self\">
@@ -249,8 +248,7 @@ if ($save_changes == 1) {
 	if (save_session_file($xml, $u->get('sessions_file')) === FALSE) {
 		die ("save failed. Please reload the page and try again");
 	}
-#	$base = $c->get('php_base');
-	$self = $c->get('php_self');
+	$self = SERVER::get('PHP_SELF');
 	log_debug("redirecting to here: $self");
 	header("Location: $self");
 	exit(0);
@@ -259,19 +257,13 @@ if ($save_changes == 1) {
 
 /* {{ ======================= BEGIN MAIN PAGE ======================= */
 
-	$t = new stdClass;
-	$t->title = $u->get('title');
-	$t->base = ".";
-	$t->username = htmlentities(SessionMgr::getUsername());
-	$t->loggedIn = SessionMgr::isLoggedIn();
+	$t = prepareTemplateEssentials();
 	$t->admin = SessionMgr::hasAdminAuth();
 
 	$t->isAdmin = SessionMgr::isRegisteredAdmin();
 	$t->adminView = SessionMgr::get('adminView');
 	$t->hideClosedSessions = SessionMgr::get('hideClosedSessions');
-
 	$t->notices = get_notices($u->get('notices_file'), SessionMgr::isRegisteredAdmin() and SessionMgr::get('adminView'));
-	$t->self = $c->get('php_self');
 	$t->sessions = prepareSessionData($xml);
 	require "templates/main.php";
 	exit(0);
@@ -289,7 +281,7 @@ if ($save_changes == 1) {
 	// -- option to add new session... but only if we're not editing something else
 	if ($admin_mode == 1 and $action != "Edit") {
 		print "<div class=\"adminFunction\">\n";
-		$self = $c->get('php_self');
+		$self = SERVER::get('PHP_SELF');
 		print "<fieldset>
 			<legend>Add New Session</legend>
 			<form method=\"post\" action=\"$self\">
@@ -405,7 +397,7 @@ EOT;
 		// ...
 
 		if ($admin_mode) {
-			$self = $c->get('php_self');
+			$self = SERVER::get('PHP_SELF');
 			echo "<form method=\"post\" action=\"$self#jump$jump\" style='padding-top: 5px; padding-bottom: 0px; margin-bottom: 0px'>";
 			if ($session->active == "yes") {
 				echo "<td class='border' width='55' bgcolor='green' align='center'>Open</td><td class='border' width='95' align='center'>";
@@ -428,8 +420,8 @@ EOT;
 		# Actions...
 		echo "<td class='border' class='border' width='100' align='center' valign='center'>";
 		if ($session->active == "yes") {
-			$self = $c->get('php_self');
-			echo "<form method=\"post\" action=\"$c->php_self#jump$jump\" style=' padding-bottom: 0px; margin-bottom: 0px'>";
+			$self = SERVER::get('PHP_SELF');
+			echo "<form method=\"post\" action=\"$self#jump$jump\" style=' padding-bottom: 0px; margin-bottom: 0px'>";
 			echo "<input type=\"hidden\" name=\"USID\" value=\"$USID\">";
 
 			$me = SessionMgr::getUsername();
@@ -479,7 +471,7 @@ EOT;
 					echo "$ulist[$i]";
 					if ($admin_mode and $session->active == "yes") {
 						echo "<div class=\"adminFunction\">\n";
-						$self = $c->get('php_self');
+						$self = SERVER::get('PHP_SELF');
 						echo "<form method=\"post\" action=\"$self#jump$jump\">";
 						echo "<input type=\"hidden\" name=\"Remove\" value=\"$ulist[$i]\">";
 						echo "<input type=\"hidden\" name=\"USID\" value=\"$USID\">";
@@ -526,7 +518,7 @@ EOT;
 		echo "<br />";
 		echo "<br />";
 		echo "<table border='1' bgcolor='red' ><tr><td>";
-		$self = $c->get('php_self');
+		$self = SERVER::get('PHP_SELF');
 		echo "<form method=\"post\" action=\"$self\" style=' padding-bottom: 0px; margin-bottom: 0px'>";
 		echo "<input type='submit' name='Action' value='Reset Session ID'>";
 		echo "</form>";
@@ -543,6 +535,12 @@ EOT;
 			echo "alert('$m')\n";
 			echo "</script>";
 		}
+	}
+	/* ======================= SHOW ANY MESSAGES ======================= */
+	while (($m = SessionMgr::getMessage()) != "") {
+		echo "<script language=\"javascript\" type=\"text/javascript\">";
+		echo "alert('$m')\n";
+		echo "</script>";
 	}
 	print_footer();
 /* }} ======================= END OLD MAIN PAGE ======================= */
@@ -679,7 +677,7 @@ function get_notices($file, $showEditButton) {
 			$results .= "<font class='securityalert'>SECURITY NOTICE : disallowed html tags found in Notices</font>\n";
 		}
 		$results .= "<div class=\"adminFunction\">\n";
-		$self = $c->get('php_self');
+		$self = SERVER::get('PHP_SELF');
 		$results .= "<form method=\"post\" action=\"$self\">";
 		$results .= "<input type=\"hidden\" name='Context' value=\"notices\">";
 		$results .= "&nbsp;&nbsp;<input type=\"submit\" name='Action' value=\"Edit\">";
@@ -716,7 +714,7 @@ function print_notices($file, $showEditButton) {
 			echo "<font class='securityalert'>SECURITY NOTICE : disallowed html tags found in Notices</font>\n";
 		}
 		print "<div class=\"adminFunction\">\n";
-		$self = $c->get('php_self');
+		$self = SERVER::get('PHP_SELF');
 		echo "<form method=\"post\" action=\"$self\">";
 		echo "<input type=\"hidden\" name='Context' value=\"notices\">";
 		echo "&nbsp;&nbsp;<input type=\"submit\" name='Action' value=\"Edit\">";
@@ -745,7 +743,7 @@ function top_bar($title, $breadcrumb) {
 	if ($breadcrumb != "") {
 		$BREAD = " > $breadcrumb ";
 	}
-	$self = $c->get('php_self');
+	$self = SERVER::get('PHP_SELF');
 	echo <<<EOT
 	<div class='topbar'>
 		<div id='title'><a href="$self">$title</a>$BREAD</div>
@@ -758,7 +756,7 @@ EOT;
 			$user = SessionMgr::getUsername();
 			print "Welcome, $user. $ADMIN| <a href=\"logout.php\">Logout</a>";
 		} else {
-			$self = $c->get('php_self');
+			$self = SERVER::get('PHP_SELF');
 			print <<<EOT
 			<form method="post" action="$self">
 			Enter your name: <input type="text" size="36" maxlength="36" name="Name">
@@ -778,7 +776,7 @@ function print_refresh_button() {
 
 	// print refresh button
 	if ($u->get('on_production') === FALSE) {
-		$self = $c->get('php_self');
+		$self = SERVER::get('PHP_SELF');
 		echo "<form method=\"post\" action=\"$self\">";
 		echo "<input type='submit' value='Reload'>";
 		echo "</form>";
