@@ -1,0 +1,16 @@
+#! /bin/bash
+
+echo "Generate an md5 hash of entered password."
+/bin/echo -n "Enter password: "
+read -s pw1
+echo "";
+/bin/echo -n "Confirm password: "
+read -s pw2
+echo "";
+
+if [ "$pw1" != "$pw2" ]; then
+	echo "Passwords did not match";
+	exit 1;
+fi
+
+php -r "echo md5('$pw1'); echo \"\n\";"

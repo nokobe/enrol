@@ -1,13 +1,13 @@
 <?php
 
 $config_title = "Set Your Title";
-$config_admin_user = "myadmin";	// deprecated
-$config_admin_users = array();
+$config_admin_users = array("{name}" => "{md5PasswordHash}", ...);
 $config_default_session_size = 8;
 $config_max_enrolments_per_line = 8;
 $config_sessions_data_file = "sessions.xml";
 $config_notices_file = "notices.txt";
 $config_log_file = "event-log.txt";
+$config_force_admin_auth = 1;	# require admin users to authenticate immediately on login
 
 # HEADER STYLE 1 - re-print header every N sessions
 $config_page_header_frequency = 0; // how often to RE-print the table header (0 == never)

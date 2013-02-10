@@ -12,7 +12,7 @@ if ($c->get('debug')) {
         echo "</pre>";
 }
 
-if ( SessionMgr::isRegisteredAdmin() === FALSE ) {
+if ( SessionMgr::isRegisteredAdmin() == FALSE ) {
 	SessionMgr::storeMessage("Permission denied");
 	header("Location: ".$c->get('index'));
 	exit(0);
@@ -41,7 +41,10 @@ $t->post = "auth.php";
 require 'templates/auth.php';
 
 function authUser($user, $hashedPassword) {
-	if ($user == "Mark Bates" && $hashedPassword == "912ec803b2ce49e4a541068d495ab570") {
+	global $u;
+	$adminList = $u->get('admin_users');
+	Logger::logDebug("found : ".$adminList[$user]);
+	if ($hashedPassword == $adminList[$user]) {
 		return true;
 	} else { 
 		return false;

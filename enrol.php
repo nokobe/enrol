@@ -257,10 +257,13 @@ if ($save_changes == 1) {
 
 /* {{ ======================= BEGIN MAIN PAGE ======================= */
 
+	if ((SessionMgr::get('adminView') == 1) and (SessionMgr::hasAdminAuth() === FALSE)) {
+		header("Location: auth.php");
+		exit(0);
+	}
 	$t = prepareTemplateEssentials();
-	$t->admin = SessionMgr::hasAdminAuth();
-
 	$t->isAdmin = SessionMgr::isRegisteredAdmin();
+	$t->admin = SessionMgr::hasAdminAuth();
 	$t->adminView = SessionMgr::get('adminView');
 	$t->hideClosedSessions = SessionMgr::get('hideClosedSessions');
 	$t->notices = get_notices($u->get('notices_file'), SessionMgr::isRegisteredAdmin() and SessionMgr::get('adminView'));
@@ -799,11 +802,6 @@ EOT;
 	}
 }
 
-# SessionMgr::hasAdminAuth();
-# SessionMgr::isRegisteredAdmin();
-# SessionMgr::get('adminView');
-# SessionMgr::get('hideClosedSessions');
-
 function prepareSessionData($xml) {
 	global $c, $u;
 
@@ -811,11 +809,17 @@ function prepareSessionData($xml) {
 	$allSessions = $xml->xpath('/sessions/session');
 	usort($allSessions, 'sort_sessions_by_time');
 	$sessions = new Sessions($u->get('sessions_file'));
+
+	$isRegisteredAdmin = SessionMgr::isRegisteredAdmin();
+	$adminView = SessionMgr::get('adminView');
+	$hideClosedSessions = SessionMgr::get('hideClosedSessions');
+	$user = SessionMgr::getUsername();
+	$isLoggedIn = SessionMgr::isLoggedIn();
 	foreach ($allSessions as $s) {
-		if ($s->active != 'yes' and (!SessionMgr::isRegisteredAdmin() or !SessionMgr::get('adminView'))) {
+		if ($s->active != 'yes' and ($isRegisteredAdmin == false or $adminView == false)) {
 			continue;
 		}
-		if (SessionMgr::get('hideClosedSessions') and $s->active != 'yes') {
+		if ($hideClosedSessions and $s->active != 'yes') {
 			continue;
 		}
 
@@ -829,11 +833,10 @@ function prepareSessionData($xml) {
 		$xo->numelements = ( intval( $xo->maxClassSize / 6) + 1) * 6;
 
 		$isActive = $s->active == "yes";
-		$user = SessionMgr::getUsername();
 
 		$xo->sessionStatus = "";
 		$xo->sessionops = array();
-		if (SessionMgr::isRegisteredAdmin() and SessionMgr::get('adminView')) {
+		if ($isRegisteredAdmin and $adminView) {
 			$xo->sessionStatus = $isActive ?
 			       	'<button class="btn btn-small btn-success disabled" type=button name="Action" value="opensession">Open</button>'
 				: '<button class="btn btn-small btn-danger disabled" type=button name="Action" value="opensession">Closed</button>';
@@ -843,7 +846,7 @@ function prepareSessionData($xml) {
 			if ($isActive) { $xo->sessionops[] = '<button class="btn btn-small" type="submit" name="Action" value="close-session">Close Session</button>'; }
 			if (!$isActive) { $xo->sessionops[] = '<button class="btn btn-small" type="submit" name="Action" value="delete-session">Delete Session</button>'; }
 		}
-		if ($isActive and SessionMgr::isLoggedIn()) {
+		if ($isActive and $isLoggedIn) {
 			if (userIsEnrolled($user, $s)) {
 				$xo->sessionops[] = '<button class="btn btn-small btn-danger" type="submit" name="Action" value="unenrol">Un-enrol</button>'; 
 			} else {

@@ -7,7 +7,7 @@ require "templates/header.php";
  */
 
 echo <<<EOF
-<h2>Please authenticate in order to gain access to the Admin functions</h2>
+<h2>Admin users are required to authenticate immediately</h2>
 <form class="form-horizontal" method="post" action="$t->post">
 	<div class="control-group">
 		<label class="control-label" for="inputEmail">Name</label>

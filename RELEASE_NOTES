@@ -1,3 +1,22 @@
+version 2.3.2-exp.9 added Admin authentication. fine tuning codebase.
+	- admin username and password now comes from local config file
+	- fixed erroneous use of === when returning 0 rather than false!
+	- (and changed the return value to be false for good measure!)
+	- moved calls to SessionMgr to be outside main loop
+	- finally implemented Logger class. Starting rolling out it's use
+	- added configuration item: forceAdminAuth -- determines whether Admins are
+	  required to authenticate immediately on login.
+	- removed deprecated config item: admin_user
+
+version 2.3.2-exp.8 major dev checkpoint. all functions implemented
+	- debug code gets ugly.. there are some raw file_put_contents!
+	- admin passwords are stored via hardcoded hash!
+	- admin functions now require authentication
+	- probably should force admin users to authenticate immediately so that
+	  their use really is reserved for admins
+	- Otherwise, remaining functions completed. Create session. Delete
+	  session.
+
 version 2.3.2-exp.7 major dev checkpoint. most functions implmented
 	- color adjustments
 	- moved some functions into central "functions.php" file

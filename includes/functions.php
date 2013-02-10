@@ -29,11 +29,9 @@ function log_debug($text) {
 	$DEBUG_LOG = "data/debug.log";
 	$LOGFMT_DATE = 'd/m/Y:G:i:s O';
 
-	$t = time();
-//	$ts = date($c->get('logfmt_date'));
 	$ts = date($LOGFMT_DATE);
-	$fh = fopen($DEBUG_LOG, 'a') or die("can't open $DEBUG_LOG");
 	$ip = $_SERVER['REMOTE_ADDR'];
+	$fh = fopen($DEBUG_LOG, 'a') or die("can't open $DEBUG_LOG");
 	fwrite($fh, $ts. " ".$ip." : ".$text. "\n");
 	fclose($fh);
 }
