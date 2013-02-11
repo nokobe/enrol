@@ -10,7 +10,8 @@ div.sessioninfo {
 	float: left;
 /*	color: #A1745F;*/
 /*	color: green;*/
-	color: #72BA58;
+/*	color: #72BA58;*/
+	color: rgb(57,129,33);
 /*	width: 40%;*/
 	font-size: 1.5em;
 	font-weight: bold;
@@ -49,7 +50,8 @@ td.place {
 td.occupied {
 	color: #040;
 /*	background-color: #C0D997;*/
-	background-color: #C0C997;
+/*	background-color: #C0C997;*/
+	background-color: rgb(187,232,172);
 }
 
 td.self {
