@@ -86,7 +86,6 @@ foreach ($t->sessions as $s) {
 		$mondaystr = weeknumber2monday($this_week_number, $s->when);
 		echo <<<EOT
 <!--<div class="well well-small alert alert-info">Sessions for week starting $mondaystr</div> -->
-<hr>
 <h3 class="text-center">Sessions for week starting $mondaystr</h3>
 EOT;
 	}
