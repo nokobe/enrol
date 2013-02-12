@@ -13,14 +13,11 @@ require_once 'includes/Logger.php';
 #
 
 $c = new ConfigClass; /* system configuration */
-$c->set('version', "version 2.3.2-exp.9");
+$c->set('version', "version 2.3.2-exp.10");
 $c->set('index', 'enrol.php');
 $c->set('base', getBaseURL($_SERVER));
 $c->set('logfmt_date', 'd/m/Y:G:i:s O');
 $c->set('debug', 1);
-
-Logger::setLogLevel('TRACE');
-Logger::addFileLogger('data/debug.log');
 
 #
 # Application Config
@@ -38,6 +35,7 @@ $u->set('show_session_id', $config_show_session_id);
 $u->set('max_enrolments_per_line', $config_max_enrolments_per_line);
 $u->set('on_production', $config_on_production);
 $u->set('forceAdminAuth', $config_force_admin_auth);
+$u->set('logLevel', $config_log_level);
 
 $u->set('sessions_file', "data/".$config_sessions_data_file);
 $u->set('notices_file', "data/".$config_notices_file);
@@ -46,4 +44,8 @@ $u->set('event_log', "data/".$config_log_file);
 date_default_timezone_set("Australia/Melbourne");
 
 error_reporting(E_ALL);
+
+Logger::setLogLevel($u->get('logLevel'));
+Logger::addFileLogger('data/debug.log');
+
 ?>

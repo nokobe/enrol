@@ -38,6 +38,10 @@ if ( isset($_POST['auth-submit'])) {
 
 $t = prepareTemplateEssentials();
 $t->post = "auth.php";
+$t->heading = $u->get('forceAdminAuth') ?
+	"Admin users are required to authenticate immediately"
+	: "Please authenticate to access the admin functions";
+
 require 'templates/auth.php';
 
 function authUser($user, $hashedPassword) {

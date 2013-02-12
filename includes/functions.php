@@ -146,4 +146,32 @@ function prepareTemplateEssentials() {
 	return $t;
 }
 
+function get_notices($file) {
+	global $c;
+
+	$results = "";
+
+	$tainted = file_get_contents($file);
+	$notices = strip_tags($tainted, "<a><font>");
+	$lines = explode ("\n", $notices);
+#	$results .= '<div style="width:90%; padding-left:20px;">
+#		<div style="width: 60px; position: relative; top: 0px; left: 20px; text-align: center; font-weight: bold; background: white; padding:3px; border: 0px solid black; z-index: 1;">Notices</div>
+#		<div style="position: relative; top: -8px; border: 1px solid black; z-index: 0;">
+#			<div style="padding-top:10px; padding-bottom:10px; padding-left:0px;">
+#	';
+
+	foreach ( $lines as $line ) {
+		if (preg_match('/^\s*$/', $line)) {
+			$results .= "<br />";
+		} else {
+			$results .= "$line<br />\n";
+		}
+	}
+	if ($notices != $tainted) { # something was stripped out!
+		$results .= "<font class='securityalert'>WARNING: disallowed tags have been disabled</font>\n";
+	}
+#	$results .= "</div></div></div>\n";
+	return $results;
+} // end: get_notices
+
 ?>

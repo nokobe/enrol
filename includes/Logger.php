@@ -5,7 +5,7 @@ class Logger {
 	static $Levels = array( "OFF", "FATAL", "ERROR", "WARN", "INFO", "DEBUG", "TRACE" );
 
 	function __construct() {
-		$this->logfile = "logtest.log";
+		$this->logfile = "default.log";
 		$this->logLevel = 'INFO';
 	}
 
@@ -44,7 +44,32 @@ class Logger {
 	static function logWarn($message) { if (self::loggingRequired("WARN")) { self::getLogger()->logMessage("Warn: $message"); } }
 	static function logInfo($message) { if (self::loggingRequired("INFO")) { self::getLogger()->logMessage("Info: $message"); } }
 	static function logDebug($message) { if (self::loggingRequired("DEBUG")) { self::getLogger()->logMessage("Debug: $message"); } }
-	static function logTrace($message) { if (self::loggingRequired("TRACE")) { self::getLogger()->logMessage("Trace: $message"); } }
+	static function logTrace($message) { if (self::loggingRequired("TRACE")) {
+		$stackTrace = debug_backtrace();
+
+		# caller
+		$class = isset($stackTrace[0]["class"]) ? $stackTrace[0]["class"]."::" : "";
+		$function = isset($stackTrace[1]["function"]) ? $stackTrace[1]["function"]."()" : "main()";
+		$file = $stackTrace[0]["file"];
+		$line = $stackTrace[0]["line"];
+
+		$caller = "$class$function at $file line $line";
+
+		# caller's caller
+		if (count($stackTrace) > 1) {
+			$class = isset($stackTrace[1]["class"]) ? $stackTrace[1]["class"]."::" : "";
+			$function = isset($stackTrace[2]["function"]) ? $stackTrace[2]["function"]."()" : "main()";
+			$file = $stackTrace[1]["file"];
+			$line = $stackTrace[1]["line"];
+			$called_from = "\n\tcalled from $class$function at $file line $line";
+		}
+		else {
+			$called_from = "";
+		}
+
+
+		self::getLogger()->logMessage("Trace: [$caller$called_from] $message"); }
+	}
 
 	function logMessage($message) {
 		$logMessage = "[".date(DATE_RFC822)."]";

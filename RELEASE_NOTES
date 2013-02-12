@@ -1,3 +1,24 @@
+version 2.3.2-exp.10 Implementation (almost?) complete. Various bugfixes
+	- implemented editNotices
+	  removed old-style formatting of notices (don't get in the way of bootstrap!)
+	- implemented weekly sub-heading for sessions
+	- added new config option:
+		forceAdminAuth: determines whether admin users need to authenticate immediately or not
+	- eliminated old code from enrol.php
+	- fix bug where superfluous row was shown when class size % 6 == 0
+	- added javascript check for createNewSession
+	- continued to replace old debug/log calls with calls to Logger class
+	  (I think remaining calls are in sections of redundant code anyway)
+	- log level now set from the config.inc.php
+	- log_event() now superceded by Logger::logInfo()
+	- logger::logTrace() now actually reports up to two levels of the stack backtrace
+	- shows by default!
+	- changed label: "Admin View" to "Show Admin Functions" and groups admin functions in a "well"
+	- removed superflous "Admin" tab-pane
+	Still to be fixed:
+	- tried (and so far failed) to add javascript "Are you sure?" confirmation to session delete
+	- stopped forcing Sessions-tab as default - but now neither Sessions nor Information tab
+
 version 2.3.2-exp.9 added Admin authentication. fine tuning codebase.
 	- admin username and password now comes from local config file
 	- fixed erroneous use of === when returning 0 rather than false!

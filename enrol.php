@@ -3,128 +3,21 @@
 require_once 'includes/global.php';
 $status = array();			// for sending alerts to the user
 
-/* ======================= READ POST INPUT ======================= */
-
-$action = @$_POST["Action"];
-$context = @$_POST["Context"];
-log_debug("action = $action context = $context");
-
 /* =======================  HANDLE Login/Session/Cookie =======================  */
 
 session_start();
 SessionMgr::checkForSessionOrLoginOrCookie();
 
-# this admin_mode code should be converted to calls to SessionMgr::admin_stuff()
-#$admin_mode = SessionMgr::hasAdminAuth();
-$admin_mode = SessionMgr::isRegisteredAdmin();
-log_debug("admin_mode is currently : $admin_mode");
+$admin_mode = "deprecated!";
+$action = "deprecated!";
+$context = "deprecated!";
 
 $save_changes = 0;
 $xml = load_sessions_file($u->get('sessions_file'));
 
 /* {{ ======================= BEGIN: HANDLE ACTIONS ======================= */
 
-if ($action == "edit-notices") {
-#if ($context == "notices") 
-	if ($action == "Edit") {
-		print_header($u->title, $c->get('version'));
-		top_bar($u->title, "Edit Notices");
-		$FILE = $u->get('notices_file');
-		print_notices($FILE, $action == "Edit" ? 0 : $admin_mode);
-		$notices = file_get_contents($FILE);
-		echo "Editing: $FILE" . ":<br />";
-		$self = SERVER::get('PHP_SELF');
-		echo "<form method=\"post\" action=\"$self\">";
-		echo "<textarea name=\"newnotices\" cols=160 rows=20>$notices</textarea>";
-		echo "<p>\n";
-		echo "<input type='hidden' name='Context' value='notices'>";
-		echo "<input type='submit' name='Action' value='Cancel'>";
-		echo "<input type='submit' name='Action' value='Save' >";
-		echo "</form>";
-		print_footer();
-		exit(0);
-	}
-	if ($action == "Cancel") {
-		// do nothing here. continue on as per normal
-	}
-	if ($action == "Save") {
-		$newtext = $_POST["newnotices"];
-		$FILE = $u->get('notices_file');
-		$n = file_put_contents($FILE, $newtext);
-		log_event("saved $n bytes to $FILE");
-	}
-} else if ($action == "Create New Session") {
-//		echo "create new session!!!";
-	$day = $_POST["sess_day"];
-	$mon = $_POST["sess_month"];
-	$year = $_POST["sess_year"];
-	$hour = $_POST["sess_hour"];
-	$min = $_POST["sess_minute"];
-	$ampm = $_POST["sess_ampm"];
-	$timestamp = my_mktime($day, $mon, $year, $hour, $min, $ampm);
-	$newsession = $xml->addChild('session');
-	$newsession->addChild("usid", (int)$xml->nextID);
-	$newsession->addChild("active", "no");
-	$newsession->addChild("when", $timestamp);
-	$newsession->addChild("location", $_POST["Location"]);
-	$newsession->addChild("maxusers", $_POST["Maxusers"]);
-	$xml->nextID = (int)$xml->nextID + 1;
-
-	$save_changes = 1;
-
-	$when = date($c->get('logfmt_date'), (int)$newsession->when);
-	log_event("created new session (ID = $xml->nextID, Time = $when, Location = $newsession->location)");
-} else if ($action == "enrol") {
-	$USID = $_POST["USID"];
-	if ($USID == "") {
-		die("missing USID");
-	}
-	$sessionarray = $xml->xpath("/sessions/session[usid=$USID]");
-	$session = $sessionarray[0];
-
-	$mu = $session->maxusers;
-	$enrolled_list = array();
-	if ($session->userlist != "") {
-		$enrolled_list = explode ( "|", $session->userlist);
-	}
-	$curr_size = count($enrolled_list);
-	if ($curr_size >= $mu) {
-		$status[] = "Sorry, that class is now full";
-	} else {
-		$enrolled_list[] = SessionMgr::getUsername();
-		$session->userlist = implode( "|", $enrolled_list);
-		$save_changes = 1;
-		$when = date($c->get('logfmt_date'), (int)$session->when);
-		log_event("enrolled in session (ID = $USID, Time = $when, Location = $session->location)");
-	}
-} else if ($action == "unenrol") {
-	$USID = $_POST["USID"];
-	if ($USID == "") {
-		die("missing USID");
-	}
-	$sessionarray = $xml->xpath("/sessions/session[usid=$USID]");
-	$session = $sessionarray[0];
-
-	$mu = $session->maxusers;
-
-	$enrolled_list = array();
-	if ($session->userlist != "") {
-		$enrolled_list = explode ( "|", $session->userlist);
-	}
-
-	$me = SessionMgr::getUsername();
-	$key = array_search($me, $enrolled_list);
-	if ($key === FALSE) { // hmm... not found.. this is unexpected
-		$status[] = "Error. Your name \"$me\" not found in list";
-	} else {
-		unset ( $enrolled_list[$key] );
-		$session->userlist = implode( "|", $enrolled_list);
-#			$status[] = "Removed you from session $ID";
-		$save_changes = 1;
-		$when = date($c->get('logfmt_date'), (int)$session->when);
-		log_event("un-enrolled in session (ID = $USID, Time = $when, Location = $session->location)");
-	}
-} else if ($action == "AdminRemove") {
+if ($action == "AdminRemove") {
 	$USID = $_POST["USID"];
 	if ($USID == "") {
 		die("missing USID");
@@ -150,23 +43,6 @@ if ($action == "edit-notices") {
 		$when = date($c->get('logfmt_date'), (int)$session->when);
 		log_event("Admin un-enrolled $user_to_remove from session (ID = $USID, Time = $when, Location = $session->location)");
 	}
-} else if ($action == "Open") {
-	$USID = $_POST["USID"];
-	$sessionarray = $xml->xpath("/sessions/session[usid=$USID]");
-	$session = $sessionarray[0];
-	$session->active = "yes";
-	$save_changes = 1;
-	$when = date($c->get('logfmt_date'), (int)$session->when);
-	log_event("opened session (ID = $USID, Time = $when , Location $session->location)");
-} else if ($action == "Close") {
-	$USID = $_POST["USID"];
-	$sessionarray = $xml->xpath("/sessions/session[usid=$USID]");
-	$session = $sessionarray[0];
-
-	$session->active = "no";
-	$save_changes = 1;
-	$when = date($c->get('logfmt_date'), (int)$session->when);
-	log_event("closed session (ID = $USID, Time = $when , Location $session->location)");
 } else if ($action == "Reset Session ID") {
 	// count sessions
 	$sortthis = $xml->xpath('/sessions/session');
@@ -177,63 +53,6 @@ if ($action == "edit-notices") {
 	} else {
 		print "<h2>Error: attempt to reset SessionID when there are still sessions</h2>";
 	}
-#} else if ($action == "Edit" and $context == "editsession" ) {
-} else if ($action == "edit-session") {
-	print_header($u->get('title'), $c->get('version'));
-	top_bar($u->get('title'), "Edit Session");
-
-	$USID = $_POST["USID"];
-	$sessionarray = $xml->xpath("/sessions/session[usid=$USID]");
-	$session = $sessionarray[0];
-	$self = SERVER::get('PHP_SELF');
-	print "<fieldset>
-		<legend>Edit Session (SessionID: $USID)</legend>
-		<form method=\"post\" action=\"$self\">
-		<input type=\"hidden\" name=\"Context\" value='editsession'>
-		<input type=\"hidden\" name=\"USID\" value='$USID'>";
-
-	print_datetime_selection((int)$session->when);
-	print "
-		Location: <input type=\"text\" size=\"36\" maxlength=\"36\" name=\"Location\" value=\"$session->location\">
-		&nbsp;
-		Maximum attendees:<input type=\"text\" size='2' maxlength='2' name='Maxusers' value='$session->maxusers'>
-		&nbsp;
-		<br />
-		<br />
-		<input type=\"submit\" name='Action' value='Cancel'>
-		<input type=\"submit\" name='Action' value='Save'>";
-	print "
-		</form>
-		</fieldset>";
-	print_footer();
-	exit(0);
-} else if ($action == "Delete" and $context == "editsession" ) {
-	$USID = $_POST["USID"];
-
-	$xml = delete_session($USID, $xml);
-	$save_changes = 1;
-	log_event("deleted session (ID = $USID)");
-} else if ($action == "Cancel" and $context == "editsession") {
-	// do nothing
-} else if ($action == "Save" and $context == "editsession") {
-	// get POST values for edited session including USID
-	$USID = $_POST["USID"];
-	$sessionarray = $xml->xpath("/sessions/session[usid=$USID]");
-	$session = $sessionarray[0];
-
-	$day = $_POST["sess_day"];
-	$mon = $_POST["sess_month"];
-	$year = $_POST["sess_year"];
-	$hour = $_POST["sess_hour"];
-	$min = $_POST["sess_minute"];
-	$ampm = $_POST["sess_ampm"];
-	$timestamp = my_mktime($day, $mon, $year, $hour, $min, $ampm);
-	$session->when = $timestamp;
-	$session->location = $_POST["Location"];
-	$session->maxusers = $_POST["Maxusers"];
-	$save_changes = 1;
-	$when = date($c->get('logfmt_date'), (int)$session->when);
-	log_event("edited session (ID = $USID, Time = $when , Location $session->location)");
 } else {
 	if ($action != "") {
 		log_event("unknown action: $action in context: $context");
@@ -652,45 +471,6 @@ EOT;
 	echo "</body></html>\n";
 } // end: print_footer
 
-function get_notices($file, $showEditButton) {
-	global $c;
-
-	$results = "";
-
-	$tainted = file_get_contents($file);
-	$notices = strip_tags($tainted, "<a><font>");
-	$lines = explode ("\n", $notices);
-	$results .= '<div style="width:90%; padding-left:20px;">
-		<div style="width: 60px; position: relative; top: 0px; left: 20px; text-align: center; font-weight: bold; background: white; padding:3px; border: 0px solid black; z-index: 1;">Notices</div>
-		<div style="position: relative; top: -8px; border: 1px solid black; z-index: 0;">
-			<div style="padding-top:10px; padding-bottom:10px; padding-left:0px;">
-	';
-
-	$results .= "<ul>\n";
-	foreach ( $lines as $line ) {
-		if (preg_match('/^\s*$/', $line)) {
-			$results .= "<li>&nbsp;";
-		} else {
-			$results .= "<li><img src='icons/bullet.gif' alt='-' border='0'> $line\n";
-		}
-	}
-	$results .= "</ul>\n";
-	if ($showEditButton == 1) {
-		if ($notices != $tainted) { # something was stripped out!
-			$results .= "<font class='securityalert'>SECURITY NOTICE : disallowed html tags found in Notices</font>\n";
-		}
-		$results .= "<div class=\"adminFunction\">\n";
-		$self = SERVER::get('PHP_SELF');
-		$results .= "<form method=\"post\" action=\"$self\">";
-		$results .= "<input type=\"hidden\" name='Context' value=\"notices\">";
-		$results .= "&nbsp;&nbsp;<input type=\"submit\" name='Action' value=\"Edit\">";
-		$results .= "</form>";
-		$results .= "</div>";
-	}
-	$results .= "</div></div></div>\n";
-	return $results;
-} // end: get_notices
-
 function print_notices($file, $showEditButton) {
 	global $c;
 
@@ -825,12 +605,13 @@ function prepareSessionData($xml) {
 
 		$xo = new stdClass;
 		$xo->usid = (int)$s->usid;
-		$xo->when = displayDate($s->when);
+		$xo->when = (int)$s->when;
+		$xo->whenstr = displayDate($s->when);
 		$xo->location = (string)$s->location;
 		$xo->classSize = classSize($s);
 		$xo->maxClassSize = (int)$s->maxusers;
 
-		$xo->numelements = ( intval( $xo->maxClassSize / 6) + 1) * 6;
+		$xo->numelements = ceil($xo->maxClassSize / 6) * 6;
 
 		$isActive = $s->active == "yes";
 
@@ -844,14 +625,14 @@ function prepareSessionData($xml) {
 			if (!$isActive) { $xo->sessionops[] = '<button class="btn btn-small" type="submit" name="Action" value="open-session">Open Session</button>'; }
 			$xo->sessionops[] = '<button class="btn btn-small" type="submit" name="Action" value="edit-session">Edit Session</button>';
 			if ($isActive) { $xo->sessionops[] = '<button class="btn btn-small" type="submit" name="Action" value="close-session">Close Session</button>'; }
-			if (!$isActive) { $xo->sessionops[] = '<button class="btn btn-small" type="submit" name="Action" value="delete-session">Delete Session</button>'; }
+			if (!$isActive) { $xo->sessionops[] = '<button class="btn btn-small" type="submit" name="Action" value="delete-session" onclick="return confirm(\"Are you Sure\");">Delete Session</button>'; }
 		}
 		if ($isActive and $isLoggedIn) {
 			if (userIsEnrolled($user, $s)) {
 				$xo->sessionops[] = '<button class="btn btn-small btn-danger" type="submit" name="Action" value="unenrol">Un-enrol</button>'; 
 			} else {
 				if (!classIsFull($s)) {
-					 $xo->sessionops[] = '<button class="btn btn-small btn-success" type="submit" name="Action" value="enrol">enrol</button>';
+					 $xo->sessionops[] = '<button class="btn btn-small btn-success" type="submit" name="Action" value="enrol">Enrol</button>';
 				}
 			}
 		}
@@ -864,10 +645,6 @@ function prepareSessionData($xml) {
 				$xo->users[] = "<td class='place occupied'>".htmlentities($who)."</td>";
 			}
 		}
-#		print "<pre>";
-#		print_r($xo);
-#		print "</pre>";
-
 		$x[] = $xo;
 	}
 	return $x;

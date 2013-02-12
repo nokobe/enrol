@@ -23,19 +23,20 @@ if ($t->isAdmin) {
 	if ($t->adminView) {
 		# show adminview "toggle" as ON
 		echo <<<EOT
-		<label>Admin View</label>
+		<label>Show Admin Functions</label>
 		<div class="btn-group adminView">
-		<button class="btn btn-success disabled">On</button>
-		<button class="btn" name="adminView" value="0">Off</button>
+		<button class="btn btn-small btn-success disabled">On</button>
+		<button class="btn btn-small" name="adminView" value="0">Off</button>
 		</div>
+		<div class="well">
 EOT;
 		if ($t->hideClosedSessions) {
 			# ON
 			echo <<<EOF
 			<label>Hide Closed Sessions</label>
 			<div class="btn-group hideClosedSessions">
-			<button class="btn btn-success disabled">On</button>
-			<button class="btn" name="hideClosedSessions" value="0">Off</button>
+			<button class="btn btn-small btn-success disabled">On</button>
+			<button class="btn btn-small" name="hideClosedSessions" value="0">Off</button>
 			</div>
 EOF;
 		} else {
@@ -43,22 +44,25 @@ EOF;
 			echo <<<EOF
 			<label>Hide Closed Sessions</label>
 			<div class="btn-group hideClosedSessions">
-			<button class="btn" name="hideClosedSessions" value="1">On</button>
-			<button class="btn btn-danger disabled">Off</button>
+			<button class="btn btn-small" name="hideClosedSessions" value="1">On</button>
+			<button class="btn btn-small btn-danger disabled">Off</button>
 			</div>
 EOF;
 		}
 		echo <<<LINE
 		&nbsp; &nbsp;
 		<a href="createSession.php" class="btn btn-small" type="submit" name="Action" value="create-session">Create New Session</a>
+		&nbsp; &nbsp;
+		<a href="manageNotices.php" class="btn btn-small" type="submit" name="Action" value="edit-notices">Edit Notices</a>
+		</div>
 LINE;
 	} else {
 		# show adminview "toggle" as OFF
 		echo <<<EOT
-		<label>Admin View</label>
+		<label>Show Admin Functions</label>
 		<div class="btn-group adminView">
-		<button class="btn" name="adminView" value="1">On</button>
-		<button class="btn btn-danger disabled">Off</button>
+		<button class="btn btn-small" name="adminView" value="1">On</button>
+		<button class="btn btn-small btn-danger disabled">Off</button>
 		</div>
 EOT;
 	}
@@ -68,18 +72,29 @@ echo <<<EOF
 	<div class="tabbable"> <!-- Only required for left/right tabs -->
 		<div class="tab-content">
 			<div class="tab-pane" id="information">
-				$t->notices
+				<div class="well">
+					$t->notices
+				</div>
 			</div>
-			<div class="tab-pane active" id="sessions">
+			<div class="tab-pane" id="sessions">
 				<!-- begin the big long list of sessions!! -->
-				<div class="well well-small">Sessions for week starting Monday 14th January</div>
-
 EOF;
+$prevWeekNumber = "";
 foreach ($t->sessions as $s) {
+	$thisWeekNumber = date("W", $s->when);
+	if ($thisWeekNumber != $prevWeekNumber) {
+		$mondaystr = weeknumber2monday($this_week_number, $s->when);
+		echo <<<EOT
+<!--<div class="well well-small alert alert-info">Sessions for week starting $mondaystr</div> -->
+<hr>
+<h3 class="text-center">Sessions for week starting $mondaystr</h3>
+EOT;
+	}
+	$prevWeekNumber = $thisWeekNumber;
 	echo <<<EOS
 				<div class="heading">
 					<div class="sessioninfo">
-						$s->when - $s->location ($s->maxClassSize places)
+						$s->whenstr - $s->location ($s->maxClassSize places)
 					</div>
 					<div class="status">
 						$s->sessionStatus
@@ -111,7 +126,7 @@ EOS;
 		else {
 			echo '<td class="place disabled"><div class="muted"><small>Available</small></div></td>';
 		}
-		if (($i+1) % 6 == 0 and $i < $s->maxClassSize) {
+		if (($i+1) % 6 == 0 and $i + 1 < $s->maxClassSize) {
 			echo "</tr>";
 			echo "<tr>";
 		}
@@ -123,9 +138,6 @@ EOS;
 EOS;
 }
 echo <<<EOF
-			</div>
-			<div class="tab-pane" id="admin">
-				Some admin content
 			</div>
 		</div>
 	</div>

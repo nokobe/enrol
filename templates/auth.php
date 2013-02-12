@@ -4,15 +4,16 @@ require "templates/header.php";
 /* template requires:
  * 		$t->post
  *		$t->name
+ *		$t->heading
  */
 
 echo <<<EOF
-<h2>Admin users are required to authenticate immediately</h2>
+<h2>$t->heading</h2>
 <form class="form-horizontal" method="post" action="$t->post">
 	<div class="control-group">
 		<label class="control-label" for="inputEmail">Name</label>
 		<div class="controls">
-			<input class="disabled" type="text" value="$t->username">
+			<input class="uneditable-input" type="text" value="$t->username" disabled>
 		</div>
 	</div>
 	<div class="control-group">

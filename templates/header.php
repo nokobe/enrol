@@ -33,8 +33,7 @@ echo <<<EOT
 		<a class="brand" href="$t->home">$t->title</a>
 		<ul class="nav nav-pills">
 		<li><a href="#information" data-toggle="tab">Info</a></li>
-		<li class="active"><a href="#sessions" data-toggle="tab">Sessions</a></li>
-		<li><a href="#admin" data-toggle="tab">Admin</a></li>
+		<li><a href="#sessions" data-toggle="tab">Sessions</a></li>
 		</ul>
           <div class="nav-collapse collapse">
 EOT;

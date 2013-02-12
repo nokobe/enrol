@@ -5,12 +5,12 @@ $sid = $t->s->usid;
 $loc = $t->s->location;
 $whenTS = (float) $t->s->when;
 echo <<<EOT
-		<h2>Edit Session (SessionID: $sid)</h2>
+		<h4>Session (Session id: $sid)</h4>
 		<div class="well">
 			<div class="sessioninfo">$t->sessionTime at $loc</div><div class="status">$t->status</div>
 		</div>
 		<br clear="both"/>
-		<h4>Enter new values:</h4>
+		<h4>Edit:</h4>
 		<form class="form-horizontal" method="post" action="$t->self">
 		<input type="hidden" name="USID" value='$sid'>
 EOT;
@@ -30,7 +30,7 @@ echo <<<EOT
 		<br />
 		<br />
 		<button type="submit" class="btn" name="Action" value="cancel">Cancel</button>
-		<button type="submit" class="btn btn-success" name="Action" value="save-edit-session">Save</button>
+		<button type="submit" class="btn btn-success" name="Action" value="save-edit-session">Save Changes</button>
 		</form>
 EOT;
 

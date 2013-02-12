@@ -36,6 +36,7 @@ if ($_POST['Action'] == "create-session") {
 	);
 	try {
 		$sessions->save();
+		Logger::logInfo("create-session sid:$sid when: $timestamp location:".$_POST[Location]." maxusers:".$_POST[Maxusers]);
 	} catch (Exception $e) {
 		errorPage($e->getMessage());
 	}
@@ -81,6 +82,7 @@ if ($_POST['Action'] == "create-session") {
 	$sessions->setAttr($sid, $changes);
 	try {
 		$sessions->save();
+		Logger::logInfo("save-edit-session sid:$sid when: $timestamp location:".$_POST[Location]." maxusers:".$_POST[Maxusers]);
 	} catch (Exception $e) {
 		errorPage($e->getMessage());
 	}
@@ -95,6 +97,7 @@ if ($_POST['Action'] == "create-session") {
 	$sessions->setAttr($sid, array('active' => 'yes'));
 	try {
 		$sessions->save();
+		Logger::logInfo("open-session sid:$sid");
 	} catch (Exception $e) {
 		errorPage($e->getMessage());
 	}
@@ -109,6 +112,7 @@ if ($_POST['Action'] == "create-session") {
 	$sessions->setAttr($sid, array('active' => 'no'));
 	try {
 		$sessions->save();
+		Logger::logInfo("close-session sid:$sid");
 	} catch (Exception $e) {
 		errorPage($e->getMessage());
 	}
@@ -123,26 +127,29 @@ if ($_POST['Action'] == "create-session") {
 	$sessions->removeSession($sid);
 	try {
 		$sessions->save();
+		Logger::logInfo("delete-session sid:$sid");
 	} catch (Exception $e) {
 		errorPage($e->getMessage());
 	}
-	SessionMgr::storeMessage("Deleted session ($sid)");
+	SessionMgr::storeMessage("Deleted session sid:$sid");
 	header("Location: ".$c->get('index'));
 } else if ($_POST['Action'] == 'enrol') {
 	$sessions = new Sessions($u->get('sessions_file'));
 	$sessions->enrolUser($sid, SessionMgr::getUsername());
 	try {
 		$sessions->save();
+		Logger::logInfo("enrol sid:$sid, User:".SessionMgr::getUsername());
 	} catch (Exception $e) {
 		errorPage($e->getMessage());
 	}
 	header("Location: ".$c->get('index'));
 } else if ($_POST['Action'] == 'unenrol') {
-	log_debug('Action = unenrol');
+	Logger::logTrace();
 	$sessions = new Sessions($u->get('sessions_file'));
 	try {
 		$sessions->unenrolUser($sid, SessionMgr::getUsername());
 		$sessions->save();
+		Logger::logInfo("unenrol sid:$sid, User:".SessionMgr::getUsername());
 	} catch (Exception $e) {
 		errorPage($e->getMessage());
 	}
@@ -151,4 +158,5 @@ if ($_POST['Action'] == "create-session") {
 	errorPage('unknown action: '.$_POST['Action']);
 }
 
+# vim:filetype=html:ts=2:sw=2
 ?>

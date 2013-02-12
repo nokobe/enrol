@@ -18,18 +18,16 @@
 
 class SessionMgr {
 	function isLoggedIn() {
-		Logger::logTrace("In isLoggedIn");
+		Logger::logTrace("");
 		if (isset($_SESSION['logged_in'])) {
-			Logger::logDebug("checking \$logged_in (".$_SESSION['logged_in'].")");
 			return $_SESSION['logged_in'] == 1;
 		} else {
-			Logger::logDebug("Returning FALSE (0)");
 			return 0;
 		}
 	}
 
 	function getUsername() {
-		Logger::logTrace("In getUsername");
+		Logger::logTrace("");
 		if (SessionMgr::isLoggedIn()) {
 			return $_SESSION['user'];
 		} else {
@@ -39,7 +37,7 @@ class SessionMgr {
 
 	function isRegisteredAdmin() {
 		global $u;
-		Logger::logTrace("In isRegisteredAdmin");
+		Logger::logTrace("");
 
 		if (SessionMgr::isLoggedIn() == FALSE) {
 			return FALSE;
@@ -48,7 +46,7 @@ class SessionMgr {
 	}
 
 	function hasAdminAuth() {
-		Logger::logTrace("In hasAdminAuth");
+		Logger::logTrace("");
 		if (SessionMgr::isRegisteredAdmin() == FALSE) {
 			return FALSE;
 		}
@@ -56,7 +54,7 @@ class SessionMgr {
 	}
 
 	function grantAdminAuth() {
-		Logger::logTrace("In grantAdminAuth");
+		Logger::logTrace("");
 		if (SessionMgr::isLoggedIn() == FALSE) {
 			return FALSE;
 		}
@@ -66,7 +64,7 @@ class SessionMgr {
 	function login($name, $setCookie) {
 		global $u;
 
-		Logger::logTrace("In login");
+		Logger::logTrace("");
 
 		$_SESSION['user'] = $name;
 		$_SESSION['logged_in'] = 1;
@@ -86,7 +84,7 @@ class SessionMgr {
 	}
 
 	function checkForSessionOrLoginOrCookie() {
-		Logger::logTrace("In checkForSessionOrLoginOrCookie");
+		Logger::logTrace("");
 		if (SessionMgr::isLoggedIn()) {
 			if ($_SESSION['user'] == "") { /* error/unexpected! */
 				header("Location:logout.php");
@@ -104,7 +102,7 @@ class SessionMgr {
 	}
 
 	function logout() {
-		Logger::logTrace("In logout");
+		Logger::logTrace("");
 		unset($_SESSION['user']);
 		unset($_SESSION['logged_in']);
 		unset($_SESSION['login_time']);
@@ -116,7 +114,7 @@ class SessionMgr {
 	}
 
 	function get($var) {
-		Logger::logTrace("In get");
+		Logger::logTrace("");
 		if (isset($_SESSION[$var])) {
 			return $_SESSION[$var];
 		}
@@ -126,25 +124,24 @@ class SessionMgr {
 	}
 
 	function set($var, $value) {
-		Logger::logTrace("In set");
+		Logger::logTrace("");
 		$_SESSION[$var] = $value;
 	}
 
 	function storeMessage($message) {
-		Logger::logTrace("In storeMessage");
+		Logger::logTrace("");
 		$_SESSION["messages"][] = $message;
-		file_put_contents("data/debug.log", "stored message: $message", FILE_APPEND | LOCK_EX);
+		Logger::logInfo("stored message: $message");
 	}
 
 	function getMessage() {
-		Logger::logTrace("In getMessage");
+		Logger::logTrace("");
 		if (isset($_SESSION["messages"])) {
 			$type = gettype($_SESSION["messages"]);
 			if (gettype($_SESSION["messages"]) == "array") {
-				file_put_contents("data/debug.log", "yes", FILE_APPEND | LOCK_EX);
 				return array_shift( $_SESSION["messages"] );
 			} else {
-				file_put_contents("data/debug.log", "no. it's a $type", FILE_APPEND | LOCK_EX);
+				Logger::logWarn("stored message is a $type, not an array!");
 			}
 		}
 	}
