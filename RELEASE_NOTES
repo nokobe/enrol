@@ -1,3 +1,5 @@
+version 2.3.2-exp.12 Implemented adminRemove function + a few minor bugfixes
+
 version 2.3.2-exp.11
 	- removed deprecated code, including log_event (now uses Logger::logInfo)
 	- replaced lousy function weeknumber2monday() with getPreviousMonday() (much better!, WWIT)

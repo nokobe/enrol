@@ -58,7 +58,6 @@ $t->adminView = SessionMgr::get('adminView');
 $t->hideClosedSessions = SessionMgr::get('hideClosedSessions');
 $t->announcements = get_notices($u->get('notices_file'));
 $t->announcements = implode("\n", array_splice(explode("\n", $t->announcements), 0, 3)); // trialling... just show the first few lines
-		$session->userlist = implode( "|", $enrolled_list);
 $t->notices = get_notices($u->get('notices_file'));
 $xml = load_sessions_file($u->get('sessions_file'));
 $t->sessions = prepareSessionData($xml);
@@ -143,11 +142,19 @@ function prepareSessionData($xml) {
 		}
 		$xo->users = array();
 		foreach (enrolled($s) as $who) {
+			$adminRemove = '<a href="adminRemove.php?sid='.$xo->usid.'&user='.urlencode($who).'" alt="admin remove user"><i class="icon-trash"></i></a>';
 			if ($who == $user) {
-#				$xo->users[] = '<td class="place occupied self">$who <i class="icon-trash"></i></td>';
-				$xo->users[] = "<td class='place occupied self'>".htmlentities($who)."</td>";
+				if ($isRegisteredAdmin and $adminView) {
+					$xo->users[] = '<td class="place occupied self">'.htmlentities($who)." $adminRemove</td>";
+				} else {
+					$xo->users[] = "<td class='place occupied self'>".htmlentities($who)."</td>";
+				}
 			} else {
-				$xo->users[] = "<td class='place occupied'>".htmlentities($who)."</td>";
+				if ($isRegisteredAdmin and $adminView) {
+					$xo->users[] = "<td class='place occupied'>".htmlentities($who)." $adminRemove</td>";
+				} else {
+					$xo->users[] = "<td class='place occupied'>".htmlentities($who)."</td>";
+				}
 			}
 		}
 		$x[] = $xo;

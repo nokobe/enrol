@@ -13,11 +13,11 @@ require_once 'includes/Logger.php';
 #
 
 $c = new ConfigClass; /* system configuration */
-$c->set('version', "version 2.3.2-exp.11");
+$c->set('version', "version 2.3.2-exp.12");
 $c->set('index', 'enrol.php');
 $c->set('base', getBaseURL($_SERVER));
 $c->set('logfmt_date', 'd/m/Y:G:i:s O');
-$c->set('debug', 1);
+$c->set('debug', 0);
 
 #
 # Application Config

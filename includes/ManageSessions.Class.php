@@ -9,7 +9,7 @@
  *	save()			- throws exception if save fails
  * $sessions = getSessions($sid)	- get all sessions (sorted by time)
  * $obj = getSession($sid)	- return the session object
- * $sid = addSession()	- NYI
+ * $sid = addSession()
  *	removeSession($sid)	- etc
  *	getAttr($sid, $attr)	- NYI
  *	setAttr($sid, $array)	- set the attributes in the given session
@@ -96,6 +96,7 @@ class Sessions {
 		$new->addChild("location", $attributes["location"]);
 		$new->addChild("maxusers", $attributes["maxusers"]);
 		$this->xml->nextID = $newID + 1;
+		return $newID;
 	}
 
 	function removeSession($sid) {

@@ -144,7 +144,7 @@ if ($_POST['Action'] == "create-session") {
 	}
 	header("Location: ".$c->get('index'));
 } else if ($_POST['Action'] == 'unenrol') {
-	Logger::logTrace();
+	Logger::logTrace("");
 	$sessions = new Sessions($u->get('sessions_file'));
 	try {
 		$sessions->unenrolUser($sid, SessionMgr::getUsername());
@@ -158,5 +158,5 @@ if ($_POST['Action'] == "create-session") {
 	errorPage('unknown action: '.$_POST['Action']);
 }
 
-# vim:filetype=html:ts=2:sw=2
+# vim:filetype=html:ts=4:sw=4
 ?>

@@ -131,7 +131,7 @@ class SessionMgr {
 	function storeMessage($message) {
 		Logger::logTrace("");
 		$_SESSION["messages"][] = $message;
-		Logger::logInfo("stored message: $message");
+		Logger::logDebug("stored message: $message");
 	}
 
 	function getMessage() {

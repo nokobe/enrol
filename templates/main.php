@@ -99,7 +99,7 @@ foreach ($t->sessions as $s) {
 	$thisWeekNumber = date("W", $s->when);
 	if ($thisWeekNumber != $prevWeekNumber) {
 		$mondaystr = date("l jS F, Y", getPreviousMonday($s->when));
-		echo '<h3 class="text-center">Sessions for week starting'.$mondaystr.'</h3>';
+		echo '<h3 class="text-center">Sessions for week starting '.$mondaystr.'</h3>';
 	}
 	$prevWeekNumber = $thisWeekNumber;
 	echo <<<EOS
