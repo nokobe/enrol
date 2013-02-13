@@ -13,7 +13,7 @@ require_once 'includes/Logger.php';
 #
 
 $c = new ConfigClass; /* system configuration */
-$c->set('version', "version 2.3.2-exp.12");
+$c->set('version', "version 2.3.2-exp.13");
 $c->set('index', 'enrol.php');
 $c->set('base', getBaseURL($_SERVER));
 $c->set('logfmt_date', 'd/m/Y:G:i:s O');
@@ -39,6 +39,7 @@ $u->set('logLevel', $config_log_level);
 
 $u->set('sessions_file', "data/".$config_sessions_data_file);
 $u->set('notices_file', "data/".$config_notices_file);
+$u->set('announcements_file', "data/".$config_announcements_file);
 $u->set('event_log', "data/".$config_log_file);
 
 date_default_timezone_set("Australia/Melbourne");
