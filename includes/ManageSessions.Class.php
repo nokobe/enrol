@@ -121,7 +121,7 @@ class Sessions {
 		$s = $this->getSession($sid);
 		foreach ($array as $key => $value) {
 			$s->$key = $value;
-			log_debug("Set Attr: $key => $value");
+			Logger::logDebug("Set Attr: $key => $value");
 		}
 	}
 
@@ -156,10 +156,10 @@ class Sessions {
 		if ($who === FALSE) {
 			throw new Exception("couldn't find $name in $who");
 		}
-		log_debug("ok. unenrol $name from $sid");
+		Logger::logDebug("ok. unenrol $name from $sid");
 		$index = array_search($name, $who);
 		unset ( $who[$index] );
-		log_debug("unsetting who[$index]");
+		Logger::logDebug("unsetting who[$index]");
 		$s->userlist = implode('|', $who);
 	}
 

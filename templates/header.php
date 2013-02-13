@@ -5,7 +5,21 @@
  *	$t->loggedIn
  *	$t->username
  *	$t->loginpost
+ *	$t->breadcrumbs
+
+ *	$t->active-tab
  */
+
+if (!isset($t->activetab)) {
+	$t->activetab = "sessions";
+}
+if ($t->activetab == "sessions") {
+	$sessions_tab_active = 'class="active"';
+	$notices_tab_active = '';
+} else {
+	$sessions_tab_active = '';
+	$notices_tab_active = 'class="active"';
+}
 
 echo <<<EOT
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
@@ -31,10 +45,6 @@ echo <<<EOT
       <div class="navbar-inner">
         <div class="container">
 		<a class="brand" href="$t->home">$t->title</a>
-		<ul class="nav nav-pills">
-		<li><a href="#information" data-toggle="tab">Info</a></li>
-		<li><a href="#sessions" data-toggle="tab">Sessions</a></li>
-		</ul>
           <div class="nav-collapse collapse">
 EOT;
 if ($t->loggedIn) {

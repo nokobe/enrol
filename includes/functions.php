@@ -23,19 +23,6 @@ function errorPage($errorMessage) {
 	die();
 }
 
-function log_debug($text) {
-	global $c;
-
-	$DEBUG_LOG = "data/debug.log";
-	$LOGFMT_DATE = 'd/m/Y:G:i:s O';
-
-	$ts = date($LOGFMT_DATE);
-	$ip = $_SERVER['REMOTE_ADDR'];
-	$fh = fopen($DEBUG_LOG, 'a') or die("can't open $DEBUG_LOG");
-	fwrite($fh, $ts. " ".$ip." : ".$text. "\n");
-	fclose($fh);
-}
-
 /*
  * return nicely formated date
  */
@@ -135,7 +122,7 @@ function prepareTemplateEssentials() {
 	$t->title = $u->get('title');
 	$t->base = ".";
 	$t->loggedIn = SessionMgr::isLoggedIn();
-	$t->username = SessionMgr::getUsername();
+	$t->username = htmlentities(SessionMgr::getUsername());
 	$t->loginpost = $c->get('index');
 	$t->home = $c->get('index');
 
@@ -147,18 +134,11 @@ function prepareTemplateEssentials() {
 }
 
 function get_notices($file) {
-	global $c;
-
 	$results = "";
 
 	$tainted = file_get_contents($file);
 	$notices = strip_tags($tainted, "<a><font>");
 	$lines = explode ("\n", $notices);
-#	$results .= '<div style="width:90%; padding-left:20px;">
-#		<div style="width: 60px; position: relative; top: 0px; left: 20px; text-align: center; font-weight: bold; background: white; padding:3px; border: 0px solid black; z-index: 1;">Notices</div>
-#		<div style="position: relative; top: -8px; border: 1px solid black; z-index: 0;">
-#			<div style="padding-top:10px; padding-bottom:10px; padding-left:0px;">
-#	';
 
 	foreach ( $lines as $line ) {
 		if (preg_match('/^\s*$/', $line)) {
@@ -170,8 +150,12 @@ function get_notices($file) {
 	if ($notices != $tainted) { # something was stripped out!
 		$results .= "<font class='securityalert'>WARNING: disallowed tags have been disabled</font>\n";
 	}
-#	$results .= "</div></div></div>\n";
 	return $results;
 } // end: get_notices
+
+function getPreviousMonday($date) {
+	$dateArray = getdate($date);
+	return $dateArray[0] - ($dateArray['wday'] - 1) * 86400;
+}
 
 ?>

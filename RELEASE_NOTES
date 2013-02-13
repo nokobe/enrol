@@ -1,3 +1,13 @@
+version 2.3.2-exp.11
+	- removed deprecated code, including log_event (now uses Logger::logInfo)
+	- replaced lousy function weeknumber2monday() with getPreviousMonday() (much better!, WWIT)
+	- protect display of username with htmlentities()
+	  (I had done this previously but that had been lost along the way)
+	- Coded display of active tab based on template variable $t->activetab
+	- Moved tabs back down from login/top bar back into main page
+	- Trial display of Announcements data at top of page as separate to the
+	  notices data displayed in the Notices tab.
+
 version 2.3.2-exp.10 Implementation (almost?) complete. Various bugfixes
 	- implemented editNotices
 	  removed old-style formatting of notices (don't get in the way of bootstrap!)

@@ -18,6 +18,14 @@ if ($c->get('debug')) {
 	echo "</pre>";
 }
 
+if ($t->activetab == "sessions") {
+	$sessions_pane_active = 'active';
+	$notices_pane_active = '';
+} else {
+	$sessions_pane_active = '';
+	$notices_pane_active = 'active';
+}
+
 if ($t->isAdmin) {
 	echo '<form class="form-inline" method="post" action="admin.php">';
 	if ($t->adminView) {
@@ -69,25 +77,29 @@ EOT;
 	echo '</form>';
 }
 echo <<<EOF
+	<div class="well">$t->announcements</div>
 	<div class="tabbable"> <!-- Only required for left/right tabs -->
+
+		<ul class="nav nav-tabs">
+			<li $notices_tab_active><a href="#information" data-toggle="tab"><b>Notices</b></a></li>
+			<li $sessions_tab_active><a href="#sessions" data-toggle="tab"><b>Sessions</b></a></li>
+		</ul>
+
 		<div class="tab-content">
-			<div class="tab-pane" id="information">
+			<div class="tab-pane $notices_pane_active" id="information">
 				<div class="well">
 					$t->notices
 				</div>
 			</div>
-			<div class="tab-pane" id="sessions">
+			<div class="tab-pane $sessions_pane_active" id="sessions">
 				<!-- begin the big long list of sessions!! -->
 EOF;
 $prevWeekNumber = "";
 foreach ($t->sessions as $s) {
 	$thisWeekNumber = date("W", $s->when);
 	if ($thisWeekNumber != $prevWeekNumber) {
-		$mondaystr = weeknumber2monday($this_week_number, $s->when);
-		echo <<<EOT
-<!--<div class="well well-small alert alert-info">Sessions for week starting $mondaystr</div> -->
-<h3 class="text-center">Sessions for week starting $mondaystr</h3>
-EOT;
+		$mondaystr = date("l jS F, Y", getPreviousMonday($s->when));
+		echo '<h3 class="text-center">Sessions for week starting'.$mondaystr.'</h3>';
 	}
 	$prevWeekNumber = $thisWeekNumber;
 	echo <<<EOS
