@@ -52,6 +52,7 @@ if ($_POST['Action'] == "create-session") {
 	$s = $sessions->getSession($sid);
 	$isActive = $s->active == "yes";
 	$t = prepareTemplateEssentials();
+	$t->post = "manageSessions.php";
 	$t->status = $s->sessionStatus = $isActive ?
 		'<button class="btn btn-small btn-success disabled" type=button name="Action" value="opensession">Open</button>'
 		: '<button class="btn btn-small btn-danger disabled" type=button name="Action" value="opensession">Closed</button>';
@@ -82,7 +83,7 @@ if ($_POST['Action'] == "create-session") {
 	$sessions->setAttr($sid, $changes);
 	try {
 		$sessions->save();
-		Logger::logInfo("save-edit-session sid:$sid when: $timestamp location:".$_POST[Location]." maxusers:".$_POST[Maxusers]);
+		Logger::logInfo("save-edit-session sid:$sid when: $timestamp location:".$_POST['Location']." maxusers:".$_POST['Maxusers']);
 	} catch (Exception $e) {
 		errorPage($e->getMessage());
 	}

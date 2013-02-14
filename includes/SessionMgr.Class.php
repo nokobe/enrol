@@ -72,7 +72,7 @@ class SessionMgr {
 		$_SESSION['login_time'] = time();
 		if ($setCookie) {
 			$twoMonths = 60 * 60 * 24 * 60 + time();
-			setcookie('EnrolName', $user, $twoMonths);
+			setcookie('EnrolName', $name, $twoMonths);
 		}
 		else {
 			setcookie('EnrolName', '', time()-3600);	# clear any existing cookie

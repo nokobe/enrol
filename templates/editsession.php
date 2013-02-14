@@ -11,7 +11,7 @@ echo <<<EOT
 		</div>
 		<br clear="both"/>
 		<h4>Edit:</h4>
-		<form class="form-horizontal" method="post" action="$t->self">
+		<form class="form-horizontal" method="post" action="$t->post">
 		<input type="hidden" name="USID" value='$sid'>
 EOT;
 print_datetime_selection($whenTS);

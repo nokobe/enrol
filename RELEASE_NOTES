@@ -1,3 +1,13 @@
+version 2.3.2-exp.14 implemented edit Announcements
+	- added yoga image (but need to change this to be controlled via the
+	  config, but for now, it is hard coded in)
+	- some minor bugfixes
+
+version 2.3.2-exp.13 Added Announcements, which stay at the top of page
+        Note:
+	- need to hide "well" when announcements is empty
+	- need to implment edit Announcements
+
 version 2.3.2-exp.12 Implemented adminRemove function + a few minor bugfixes
 
 version 2.3.2-exp.11

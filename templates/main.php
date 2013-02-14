@@ -26,6 +26,14 @@ if ($t->activetab == "sessions") {
 	$notices_pane_active = 'active';
 }
 
+echo <<<EOT
+	<div class="row">
+		<div class="span2">
+			<img class="media-object" src="yoga.jpg">
+		</div>
+		<div class="span10">
+EOT;
+
 if ($t->isAdmin) {
 	echo '<form class="form-inline" method="post" action="admin.php">';
 	if ($t->adminView) {
@@ -61,7 +69,9 @@ EOF;
 		&nbsp; &nbsp;
 		<a href="createSession.php" class="btn btn-small" type="submit" name="Action" value="create-session">Create New Session</a>
 		&nbsp; &nbsp;
-		<a href="manageNotices.php" class="btn btn-small" type="submit" name="Action" value="edit-notices">Edit Notices</a>
+		<a href="manageNotices.php?target=announcements" class="btn btn-small" type="submit" name="Action" value="edit-notices">Edit Announcements</a>
+		&nbsp; &nbsp;
+		<a href="manageNotices.php?target=notices" class="btn btn-small" type="submit" name="Action" value="edit-notices">Edit Notices</a>
 		</div>
 LINE;
 	} else {
@@ -152,6 +162,7 @@ echo <<<EOF
 			</div>
 		</div>
 	</div>
+</div> <!-- end span10 column -->
 
 EOF;
 require 'templates/footer.php';

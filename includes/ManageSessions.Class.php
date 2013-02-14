@@ -75,7 +75,7 @@ class Sessions {
 
 		$bakfile = "$this->datafile.bak";
 		if (! copy ( $this->datafile, $bakfile ) ) {
-			log_event("WARNING: backup sessions file failed");
+			Logger::logWarn("backup sessions file failed");
 		}
 		if (! $this->xml->asXML( $this->datafile )) {
 		       	throw new Exception("Unable to save Sessions file");
