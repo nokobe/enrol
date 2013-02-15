@@ -75,5 +75,27 @@ EOT;
 <div class="container">
 
 EOT;
+
+if (isset($status)) {
+	if ($status) {
+		foreach ($status as $m) {
+			echo <<<EOT
+			<div class="alert alert-info">
+				$m
+				<a class="close" data-dismiss="alert" href="#">&times;</a>
+			</div>
+EOT;
+		}
+	}
+}
+/* ======================= SHOW ANY MESSAGES ======================= */
+while (($m = SessionMgr::getMessage()) != "") {
+	echo <<<EOT
+	<div class="alert alert-info">
+	$m
+	<a class="close" data-dismiss="alert" href="#">&times;</a>
+	</div>
+EOT;
+}
 # vim:filetype=html
 ?>
