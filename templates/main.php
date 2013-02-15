@@ -115,7 +115,7 @@ foreach ($t->sessions as $s) {
 	echo <<<EOS
 				<div class="heading">
 					<div class="sessioninfo">
-						$s->whenstr - $s->location ($s->maxClassSize places)
+						$s->whenstr - $s->location
 					</div>
 					<div class="status">
 						$s->sessionStatus
