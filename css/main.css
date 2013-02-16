@@ -6,6 +6,10 @@ body {
 	padding-top: 55px;
 }
 
+.well {
+	padding: 9px;
+}
+
 div.sessioninfo {
 	float: left;
 /*	color: #A1745F;*/
@@ -86,4 +90,12 @@ div.adminView{
 
 form {
 	margin: 0px 0px 0px 0px;
+}
+
+h3 span {
+	font-size: 14px;
+	display: block;
+	line-height: 1;
+	color: #999;
+	font-weight:normal
 }

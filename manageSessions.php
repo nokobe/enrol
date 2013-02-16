@@ -8,15 +8,6 @@ if (!isset($_POST['USID'])) { errorPage("missing USID"); die(); }
 
 $sid = $_POST["USID"];
 
-if ($c->get('debug')) {
-        echo "<pre>";
-        echo "Session:";
-        print_r($_SESSION);
-        echo "Post:";
-        print_r($_POST);
-        echo "</pre>";
-}
-
 if ($_POST['Action'] == "create-session") {
 	if (SessionMgr::hasAdminAuth() === FALSE) {
 		SessionMgr::storeMessage("Permission denied");

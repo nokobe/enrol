@@ -19,7 +19,7 @@ echo <<<EOF
 	<div class="control-group">
 		<label class="control-label" for="inputPassword">Password</label>
 		<div class="controls">
-			<input type="password" id="inputPassword" placeholder="Password" name="password">
+			<input type="password" id="inputPassword" placeholder="Password" name="password" autofocus>
 		</div>
 	</div>
 	<div class="control-group">

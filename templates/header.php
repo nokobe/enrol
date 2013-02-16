@@ -28,13 +28,14 @@ echo <<<EOT
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 	<meta name="author" content="http://github.com/nokobe">
-	<title>
-		$t->title
-	</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="$t->base/css/bootstrap.min.css" type="text/css" media="screen" title="no title" charset="utf-8">
 	<link rel="stylesheet" href="$t->base/css/bootstrap-responsive.min.css" type="text/css" media="screen" title="no title" charset="utf-8">
 	<link rel="stylesheet" href="$t->base/css/main.css" type="text/css" media="screen" title="no title" charset="utf-8">
 	<script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+	<title>
+		$t->title
+	</title>
 	</link>
 </head>
 <body>
@@ -45,7 +46,9 @@ echo <<<EOT
       <div class="navbar-inner">
         <div class="container">
 		<a class="brand" href="$t->home">$t->title</a>
-          <div class="nav-collapse collapse">
+		<!--          <div class="nav-collapse collapse">-->
+	<div class="pull-right">
+		
 EOT;
 if ($t->loggedIn) {
 	echo <<<EOT
@@ -72,7 +75,13 @@ EOT;
 
     <!-- end NAV BAR -->
 
-<div class="container">
+    <!--
+    <div class="visible-phone">phone</div>
+    <div class="visible-tablet">tablet</div>
+    <div class="visible-desktop">desktop</div>
+    -->
+
+<div class="container-fluid">
 
 EOT;
 

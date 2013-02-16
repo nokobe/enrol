@@ -9,14 +9,6 @@
  */
 
 require "templates/header.php";
-if ($c->get('debug')) {
-	echo "<pre>";
-	echo "Session:";
-	print_r($_SESSION);
-	echo "Post:";
-	print_r($_POST);
-	echo "</pre>";
-}
 
 if ($t->activetab == "sessions") {
 	$sessions_pane_active = 'active';
@@ -27,9 +19,11 @@ if ($t->activetab == "sessions") {
 }
 
 echo <<<EOT
-	<div class="row">
-		<div class="span2">
-			<img class="media-object" src="yoga.jpg">
+	<div class="row-fluid" >
+		<div class="span2 hidden-phone">
+			<div>
+				<img class="media-object" src="yoga.jpg">
+			</div>
 		</div>
 		<div class="span10">
 EOT;
@@ -109,8 +103,7 @@ foreach ($t->sessions as $s) {
 	$thisWeekNumber = date("W", $s->when);
 	if ($thisWeekNumber != $prevWeekNumber) {
 		$mondaystr = date("l jS F, Y", getPreviousMonday($s->when));
-		echo '<p class="muted">Sessions for week starting</p>';
-		echo '<h3 class="text-center">'.$mondaystr.'</h3>';
+		echo '<h3><span>Sessions for week starting:</span>'.$mondaystr.'</h3>';
 	}
 	$prevWeekNumber = $thisWeekNumber;
 	echo <<<EOS

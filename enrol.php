@@ -6,32 +6,6 @@ session_start();
 SessionMgr::checkForSessionOrLoginOrCookie();
 
 /*
-if ($action == "AdminRemove") {
-	$USID = $_POST["USID"];
-	if ($USID == "") {
-		die("missing USID");
-	}
-	$sessionarray = $xml->xpath("/sessions/session[usid=$USID]");
-	$session = $sessionarray[0];
-
-	$mu = $session->maxusers;
-
-	$enrolled_list = array();
-	if ($session->userlist != "") {
-		$enrolled_list = explode ( "|", $session->userlist);
-	}
-
-	$user_to_remove = @$_POST["Remove"];
-	$key = array_search($user_to_remove, $enrolled_list);
-	if ($key === FALSE) { // hmm... not found.. this is unexpected
-		$status[] = "Error. Name \"$user_to_remove\" not found in session";
-	} else {
-		unset ( $enrolled_list[$key] );
-		$session->userlist = implode( "|", $enrolled_list);
-		$save_changes = 1;
-		$when = date($c->get('logfmt_date'), (int)$session->when);
-		Logger::logInfo("Admin un-enrolled $user_to_remove from session (ID = $USID, Time = $when, Location = $session->location)");
-	}
 } else if ($action == "Reset Session ID") {
 	// count sessions
 	$sortthis = $xml->xpath('/sessions/session');

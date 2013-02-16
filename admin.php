@@ -5,15 +5,6 @@ require 'includes/global.php';
 session_start();
 SessionMgr::checkForSessionOrLoginOrCookie();
 
-if ($c->get('debug')) {
-        echo "<pre>";
-        echo "Session:";
-        print_r($_SESSION);
-        echo "Post:";
-        print_r($_POST);
-        echo "</pre>";
-}
-
 if ( SessionMgr::isRegisteredAdmin() === FALSE ) {
 	SessionMgr::storeMessage("Permission denied");
 	header("Location: ".$c->get('index'));
