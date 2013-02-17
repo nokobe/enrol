@@ -66,6 +66,12 @@ class SessionMgr {
 
 		Logger::logTrace("");
 
+		if ($name == "") {
+			// silently reject it!
+			header("Location:logout.php");
+			exit(0);
+		}
+
 		$_SESSION['user'] = $name;
 		$_SESSION['logged_in'] = 1;
 		$_SESSION['admin_auth'] = 0;
