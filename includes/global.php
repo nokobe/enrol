@@ -7,13 +7,14 @@ require_once 'includes/Config.Class.php';
 require_once 'includes/ManageSessions.Class.php';
 require_once 'includes/ENV.Class.php';
 require_once 'includes/Logger.php';
+require_once 'includes/exception_handler.php';
 
 #
 # System Config
 #
 
 $c = new ConfigClass; /* system configuration */
-$c->set('version', "version 2.3.2-exp.14");
+$c->set('version', "version 2.3.2-exp.15");
 $c->set('index', 'enrol.php');
 $c->set('base', getBaseURL($_SERVER));
 $c->set('logfmt_date', 'd/m/Y:G:i:s O');

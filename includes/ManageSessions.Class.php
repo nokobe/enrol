@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Sessions: manage the Enrol (class) sessions data
+ * ManageSessions: manage the Enrol (class) sessions data
  *
  * Provides:
  *	debugDump()		- prints the currently loads xml sessions file
@@ -19,10 +19,11 @@
  *	getClassSize($session)	- etc
  *	isClassFull($session)	- etc
  *	getEnrolled($session)	- etc
+ *	resetUSID		- NYI
  * 	
  */
 
-class Sessions {
+class ManageSessions {
 	protected $xml;
 	protected $datafile;
 	protected $lastMod;
@@ -32,10 +33,10 @@ class Sessions {
 		$this->xml = "";
 		$this->lastMod = "";
 
-		$this->load();
+//		$this->load();
 	}
 
-	private function sort_sessions_by_time($a, $b) {
+	private static function _sort_sessions_by_time($a, $b) {
 		if ((int)$a->when == (int)$b->when) {
 			return 0;
 		}
@@ -56,13 +57,12 @@ class Sessions {
 			$this->xml = new SimpleXMLElement("<sessions><nextID>1</nextID></sessions>");
 		} else {
 			try {
-				$this->xml = simplexml_load_file($this->datafile) or die ("Unable to load XML file ($this->datafile!");
+				$this->xml = simplexml_load_file($this->datafile) or die ("Unable to load XML file ($this->datafile!)");
 			} catch (Exception $e) {
 				echo "saved from ", $e->getMessage(), "\n";
 				die("but die anyway\n");
 			}
 		}
-		// SORT!
 		$this->lastMod = filemtime($this->datafile);
 
 		// NOTE: load file and get file mod time really should be an ATOMIC operation
@@ -82,12 +82,22 @@ class Sessions {
 		}
 	}
 
+	function getSessions() {
+		$this->load();
+		$all = $this->xml->xpath('/sessions/session');
+		usort($all, 'ManageSessions::_sort_sessions_by_time');
+		return $all;
+	}
+
 	function getSession($sid) {
+		$this->load();
 		list($s) = $this->xml->xpath("/sessions/session[usid=$sid]");
 		return $s;
 	}
 
 	function addSession($attributes) {
+		$this->load();
+
 		$newID = (int) $this->xml->nextID;
 		$new = $this->xml->addChild('session');
 		$new->addChild("usid", $newID);
@@ -96,10 +106,14 @@ class Sessions {
 		$new->addChild("location", $attributes["location"]);
 		$new->addChild("maxusers", $attributes["maxusers"]);
 		$this->xml->nextID = $newID + 1;
+
+		$this->save();
 		return $newID;
 	}
 
 	function removeSession($sid) {
+		$this->load();
+
 		// ==================== convert to DOM ====================
 		$dom = new DOMDocument();
 		$dom->loadXML($this->xml->asXML());
@@ -113,23 +127,31 @@ class Sessions {
 
 		// ==================== convert back to XML object ====================
 		$this->xml = new SimpleXMLElement($dom->saveXML());
+
+		$this->save();
+		Logger::logInfo("delete-session sid:$sid");
 	}
 
 	function getAttr($sid, $attr) {
 	}
 	
 	function setAttr($sid, $array) {
+		$this->load();
+
 		$s = $this->getSession($sid);
 		foreach ($array as $key => $value) {
 			$s->$key = $value;
 			Logger::logDebug("Set Attr: $key => $value");
 		}
+		$this->save();
 	}
 
 	/*
 	 * throws Exception on failure
 	 */
 	function enrolUser($sid, $name) {
+		$this->load();
+
 		$s = $this->getSession($sid);
 		if ($this->isUserEnrolled($s, $name)) {
 			throw new Exception('already enrolled');
@@ -141,14 +163,16 @@ class Sessions {
 		$who[] = $name;
 		$s->userlist = implode('|', $who);
 
-	//	$when = date('d/m/Y:G:i:s O', (int)$s->when);
-	//	log_event("enrolled in session (ID = $sid, Time = $when, Location = $s->location)");
+		$this->save();
+		Logger::logInfo("$name enrolled in session (ID = $sid, Time = $s->when, Location = $s->location)");
 	}
 
 	/*
 	 * throws Exception on failure
 	 */
 	function unenrolUser($sid, $name) {
+		$this->load();
+
 		$s = $this->getSession($sid);
 		if (! $this->isUserEnrolled($s, $name)) {
 			throw new Exception('not enrolled');
@@ -162,6 +186,20 @@ class Sessions {
 		unset ( $who[$index] );
 		Logger::logDebug("unsetting who[$index]");
 		$s->userlist = implode('|', $who);
+
+		$this->save();
+		Logger::logInfo("$name unenrolled in session (ID = $sid, Time = $s->when, Location = $s->location)");
+	}
+
+	function resetUSID() {
+		$this->load();
+
+		if (count( $xml->xpath('/sessions/session') ) > 0) {
+			errorPage("Cannot reset SessionID whilst there are still sessions");
+		} else {
+			$xml->nextID = 1;
+			$save_changes = 1;
+		}
 	}
 
 	function isUserEnrolled($session, $user) {

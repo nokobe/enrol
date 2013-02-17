@@ -12,16 +12,11 @@ if (SessionMgr::hasAdminAuth() === FALSE) {
 $sid = $_GET['sid'];
 $user = $_GET['user'];
 
-$sessions = new Sessions($u->get('sessions_file'));
-try {
-	$sessions->unenrolUser($sid, $user);
-	$sessions->save();
-	Logger::logInfo("Admin removed $user from Session (ID: $sid)");
-	SessionMgr::storeMessage("Admin removed $user from Session (ID: $sid)");
-	header("Location: ".$c->get('index'));
-} catch (Exception $e) {
-	errorPage($e->getMessage());
-}
+$sessions = new ManageSessions($u->get('sessions_file'));
+$sessions->unenrolUser($sid, $user);
+Logger::logInfo("Admin removed $user from Session (ID: $sid)");
+SessionMgr::storeMessage("Admin removed $user from Session (ID: $sid)");
+header("Location: ".$c->get('index'));
 
 # vim:filetype=html:ts=4:sw=4
 ?>

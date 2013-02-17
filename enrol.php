@@ -5,20 +5,6 @@ $status = array();			// for sending alerts to the user
 session_start();
 SessionMgr::checkForSessionOrLoginOrCookie();
 
-/*
-} else if ($action == "Reset Session ID") {
-	// count sessions
-	$sortthis = $xml->xpath('/sessions/session');
-	$total = count($sortthis);
-	if ($total == 0) {
-		$xml->nextID = 1;
-		$save_changes = 1;
-	} else {
-		print "<h2>Error: attempt to reset SessionID when there are still sessions</h2>";
-	}
-}
-*/
-
 /* {{ ======================= BEGIN MAIN PAGE ======================= */
 
 if ((SessionMgr::get('adminView') == 1) and (SessionMgr::hasAdminAuth() === FALSE)) {
@@ -32,8 +18,7 @@ $t->adminView = SessionMgr::get('adminView');
 $t->hideClosedSessions = SessionMgr::get('hideClosedSessions');
 $t->announcements = get_notices($u->get('announcements_file'));
 $t->notices = get_notices($u->get('notices_file'));
-$xml = load_sessions_file($u->get('sessions_file'));
-$t->sessions = prepareSessionData($xml);
+$t->sessions = prepareSessionData();
 require "templates/main.php";
 exit(0);
 
@@ -41,31 +26,13 @@ exit(0);
 
 /* ======================= FUNCTIONS ======================= */
 
-function load_sessions_file($file) {
-	global $time_last_moded;
-
-	if (!file_exists($file)) {
-		die ("fatal: missing sessions file ($file)");
-	}
-	if (filesize($file) == 0) {
-		// starting from scratch - empty sessions file
-		$xml = new SimpleXMLElement("<sessions><nextID>1</nextID></sessions>");
-	} else {
-		$xml = simplexml_load_file($file) or die ("Unable to load XML file!");
-	}
-	$time_last_moded = filemtime($file);	// NOTE: part 1 - load file and part 2 - get last mod
-							// really should be an ATOMIC operation
-
-	return $xml;
-} // end: load_sessions_file
-
-function prepareSessionData($xml) {
+function prepareSessionData() {
 	global $c, $u;
 
 	$x = array();
-	$allSessions = $xml->xpath('/sessions/session');
-	usort($allSessions, 'sort_sessions_by_time');
-	$sessions = new Sessions($u->get('sessions_file'));
+
+	$sessions = new ManageSessions($u->get('sessions_file'));
+	$allSessions = $sessions->getSessions();
 
 	$isRegisteredAdmin = SessionMgr::isRegisteredAdmin();
 	$adminView = SessionMgr::get('adminView');
@@ -159,13 +126,6 @@ function enrolled($s) {
 		return array();
 	}
 	return explode("|", $s->userlist);
-}
-
-function sort_sessions_by_time($a, $b) {
-	if ((int)$a->when == (int)$b->when) {
-		return 0;
-	}
-	return ((int)$a->when < (int)$b->when) ? -1 : 1;
 }
 
 ?>

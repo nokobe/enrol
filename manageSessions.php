@@ -8,13 +8,15 @@ if (!isset($_POST['USID'])) { errorPage("missing USID"); die(); }
 
 $sid = $_POST["USID"];
 
+// ok to call new ManageSessions() now as it doesn't do much but store the data filename
+$sessions = new ManageSessions($u->get('sessions_file'));
+
 if ($_POST['Action'] == "create-session") {
 	if (SessionMgr::hasAdminAuth() === FALSE) {
 		SessionMgr::storeMessage("Permission denied");
 		header("Location: ".$c->get('index'));
 		exit (0);
 	}
-	$sessions = new Sessions($u->get('sessions_file'));
 	$day = $_POST["sess_day"];
 	$mon = $_POST["sess_month"];
 	$year = $_POST["sess_year"];
@@ -22,15 +24,11 @@ if ($_POST['Action'] == "create-session") {
 	$min = $_POST["sess_minute"];
 	$ampm = $_POST["sess_ampm"];
 	$timestamp = my_mktime($day, $mon, $year, $hour, $min, $ampm);
+
 	$sid = $sessions->addSession(
 		array( "active" => "no", "when" => $timestamp, "location" => $_POST["Location"], "maxusers" => $_POST["Maxusers"] )
 	);
-	try {
-		$sessions->save();
-		Logger::logInfo("create-session sid:$sid when: $timestamp location:".$_POST[Location]." maxusers:".$_POST[Maxusers]);
-	} catch (Exception $e) {
-		errorPage($e->getMessage());
-	}
+	Logger::logInfo("create-session sid:$sid when: $timestamp location:".$_POST[Location]." maxusers:".$_POST[Maxusers]);
 	SessionMgr::storeMessage("Created new session (Inital state: Closed)");
 	header("Location: ".$c->get('index'));
 } else if ($_POST['Action'] == "edit-session") {
@@ -39,7 +37,6 @@ if ($_POST['Action'] == "create-session") {
 		header("Location: ".$c->get('index'));
 		exit (0);
 	}
-	$sessions = new Sessions($u->get('sessions_file'));
 	$s = $sessions->getSession($sid);
 	$isActive = $s->active == "yes";
 	$t = prepareTemplateEssentials();
@@ -59,7 +56,6 @@ if ($_POST['Action'] == "create-session") {
 		header("Location: ".$c->get('index'));
 		exit (0);
 	}
-	$sessions = new Sessions($u->get('sessions_file'));
 	$day = $_POST["sess_day"];
 	$mon = $_POST["sess_month"];
 	$year = $_POST["sess_year"];
@@ -72,12 +68,7 @@ if ($_POST['Action'] == "create-session") {
 	$changes['location'] = $_POST["Location"];
 	$changes['maxusers'] = $_POST["Maxusers"];
 	$sessions->setAttr($sid, $changes);
-	try {
-		$sessions->save();
-		Logger::logInfo("save-edit-session sid:$sid when: $timestamp location:".$_POST['Location']." maxusers:".$_POST['Maxusers']);
-	} catch (Exception $e) {
-		errorPage($e->getMessage());
-	}
+	Logger::logInfo("save-edit-session sid:$sid when: $timestamp location:".$_POST['Location']." maxusers:".$_POST['Maxusers']);
 	header("Location: ".$c->get('index'));
 } else if ($_POST['Action'] == 'open-session') {
 	if (SessionMgr::hasAdminAuth() === FALSE) {
@@ -85,14 +76,8 @@ if ($_POST['Action'] == "create-session") {
 		header("Location: ".$c->get('index'));
 		exit (0);
 	}
-	$sessions = new Sessions($u->get('sessions_file'));
 	$sessions->setAttr($sid, array('active' => 'yes'));
-	try {
-		$sessions->save();
-		Logger::logInfo("open-session sid:$sid");
-	} catch (Exception $e) {
-		errorPage($e->getMessage());
-	}
+	Logger::logInfo("open-session sid:$sid");
 	header("Location: ".$c->get('index'));
 } else if ($_POST['Action'] == 'close-session') {
 	if (SessionMgr::hasAdminAuth() === FALSE) {
@@ -100,14 +85,8 @@ if ($_POST['Action'] == "create-session") {
 		header("Location: ".$c->get('index'));
 		exit (0);
 	}
-	$sessions = new Sessions($u->get('sessions_file'));
 	$sessions->setAttr($sid, array('active' => 'no'));
-	try {
-		$sessions->save();
-		Logger::logInfo("close-session sid:$sid");
-	} catch (Exception $e) {
-		errorPage($e->getMessage());
-	}
+	Logger::logInfo("close-session sid:$sid");
 	header("Location: ".$c->get('index'));
 } else if ($_POST['Action'] == 'delete-session') {
 	if (SessionMgr::hasAdminAuth() === FALSE) {
@@ -115,36 +94,14 @@ if ($_POST['Action'] == "create-session") {
 		header("Location: ".$c->get('index'));
 		exit (0);
 	}
-	$sessions = new Sessions($u->get('sessions_file'));
 	$sessions->removeSession($sid);
-	try {
-		$sessions->save();
-		Logger::logInfo("delete-session sid:$sid");
-	} catch (Exception $e) {
-		errorPage($e->getMessage());
-	}
 	SessionMgr::storeMessage("Deleted session sid:$sid");
 	header("Location: ".$c->get('index'));
 } else if ($_POST['Action'] == 'enrol') {
-	$sessions = new Sessions($u->get('sessions_file'));
 	$sessions->enrolUser($sid, SessionMgr::getUsername());
-	try {
-		$sessions->save();
-		Logger::logInfo("enrol sid:$sid, User:".SessionMgr::getUsername());
-	} catch (Exception $e) {
-		errorPage($e->getMessage());
-	}
 	header("Location: ".$c->get('index'));
 } else if ($_POST['Action'] == 'unenrol') {
-	Logger::logTrace("");
-	$sessions = new Sessions($u->get('sessions_file'));
-	try {
-		$sessions->unenrolUser($sid, SessionMgr::getUsername());
-		$sessions->save();
-		Logger::logInfo("unenrol sid:$sid, User:".SessionMgr::getUsername());
-	} catch (Exception $e) {
-		errorPage($e->getMessage());
-	}
+	$sessions->unenrolUser($sid, SessionMgr::getUsername());
 	header("Location: ".$c->get('index'));
 } else {
 	errorPage('unknown action: '.$_POST['Action']);
