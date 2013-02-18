@@ -2,13 +2,17 @@
 require_once 'includes/global.php';
 session_start();
 SessionMgr::checkForSessionOrLoginOrCookie();
-
-if (isset($_POST['Action']) == FALSE) {
-	if (SessionMgr::hasAdminAuth() === FALSE) {
+if (SessionMgr::hasAdminAuth() == FALSE) {
+	if (SessionMgr::isRegisteredAdmin() == TRUE) {
+		header("Location: auth.php");
+		exit (0);
+	} else {
 		SessionMgr::storeMessage("Permission denied");
 		header("Location: ".$c->get('index'));
 		exit (0);
 	}
+}
+if (isset($_POST['Action']) == FALSE) {
 	if (isset($_GET['target'])) {
 		$target = $_GET['target'];
 		if ($target == "notices") {
@@ -39,11 +43,6 @@ if (isset($_POST['Action']) == FALSE) {
 			header("Location: ".$c->get('index'));
 	}
 } else if ($_POST['Action'] == "save-edit-announcements") {
-	if (SessionMgr::hasAdminAuth() === FALSE) {
-		SessionMgr::storeMessage("Permission denied");
-		header("Location: ".$c->get('index'));
-		exit (0);
-	}
 	$newtext = $_POST["newnotices"];
 
 	$destFile = $u->get('announcements_file');
@@ -56,11 +55,6 @@ if (isset($_POST['Action']) == FALSE) {
 	Logger::logInfo("[file: $destFile] Saved $bytes bytes");
 	header("Location: ".$c->get('index')."#information");
 } else if ($_POST['Action'] == "save-edit-notices") {
-	if (SessionMgr::hasAdminAuth() === FALSE) {
-		SessionMgr::storeMessage("Permission denied");
-		header("Location: ".$c->get('index'));
-		exit (0);
-	}
 	$newtext = $_POST["newnotices"];
 
 	$destFile = $u->get('notices_file');

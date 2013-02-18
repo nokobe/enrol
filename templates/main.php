@@ -28,12 +28,35 @@ echo <<<EOT
 		<div class="span10">
 EOT;
 
+if (isset($status)) {
+	if ($status) {
+		foreach ($status as $m) {
+			echo <<<EOT
+			<div class="alert alert-info">
+				$m
+				<a class="close" data-dismiss="alert" href="#">&times;</a>
+			</div>
+EOT;
+		}
+	}
+}
+/* ======================= SHOW ANY MESSAGES ======================= */
+while (($m = SessionMgr::getMessage()) != "") {
+	echo <<<EOT
+	<div class="alert alert-info">
+	$m
+	<a class="close" data-dismiss="alert" href="#">&times;</a>
+	</div>
+EOT;
+}
+
+
 if ($t->isAdmin) {
 	echo '<form class="form-inline" method="post" action="admin.php">';
 	if ($t->adminView) {
 		# show adminview "toggle" as ON
 		echo <<<EOT
-		<label>Show Admin Functions</label>
+		<label>Admin Mode</label>
 		<div class="btn-group adminView">
 		<button class="btn btn-small btn-success disabled">On</button>
 		<button class="btn btn-small" name="adminView" value="0">Off</button>
@@ -71,7 +94,7 @@ LINE;
 	} else {
 		# show adminview "toggle" as OFF
 		echo <<<EOT
-		<label>Show Admin Functions</label>
+		<label>Admin Mode</label>
 		<div class="btn-group adminView">
 		<button class="btn btn-small" name="adminView" value="1">On</button>
 		<button class="btn btn-small btn-danger disabled">Off</button>
@@ -98,6 +121,9 @@ echo <<<EOF
 			<div class="tab-pane $sessions_pane_active" id="sessions">
 				<!-- begin the big long list of sessions!! -->
 EOF;
+if (count($t->sessions) == 0) {
+	echo '<h4>There are currently no sessions available</h4>';
+}
 $prevWeekNumber = "";
 foreach ($t->sessions as $s) {
 	$thisWeekNumber = date("W", $s->when);

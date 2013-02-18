@@ -103,9 +103,19 @@ if ($_POST['Action'] == "create-session") {
 	SessionMgr::storeMessage($message);
 	header("Location: ".$c->get('index'));
 } else if ($_POST['Action'] == 'enrol') {
+	if (SessionMgr::isLoggedIn() === FALSE) {
+		SessionMgr::storeMessage("You need to be logged in to enrol");
+		header("Location: ".$c->get('index'));
+		exit (0);
+	}
 	$sessions->enrolUser($sid, SessionMgr::getUsername());
 	header("Location: ".$c->get('index'));
 } else if ($_POST['Action'] == 'unenrol') {
+	if (SessionMgr::isLoggedIn() === FALSE) {
+		SessionMgr::storeMessage("You need to logged in to unenrol");
+		header("Location: ".$c->get('index'));
+		exit (0);
+	}
 	$sessions->unenrolUser($sid, SessionMgr::getUsername());
 	header("Location: ".$c->get('index'));
 } else {
