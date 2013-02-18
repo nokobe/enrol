@@ -1,3 +1,5 @@
+version 3.0 rebadged version 2.3.2-exp.17 ready for release
+
 version 2.3.2-exp.17 minor tweaks preparing for major release
 	- bring hasAdminAuth() to top of manageNotices.php
 	- protect enrol() unenrol() with isLoggedIn() check
