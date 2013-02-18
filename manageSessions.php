@@ -28,8 +28,8 @@ if ($_POST['Action'] == "create-session") {
 	$sid = $sessions->addSession(
 		array( "active" => "no", "when" => $timestamp, "location" => $_POST["Location"], "maxusers" => $_POST["Maxusers"] )
 	);
-	Logger::logInfo("create-session sid:$sid when: $timestamp location:".$_POST[Location]." maxusers:".$_POST[Maxusers]);
-	SessionMgr::storeMessage("Created new session (Inital state: Closed)");
+	$s = $sessions->getSession($sid);
+	SessionMgr::storeMessage("Created session [ when => ".date("l jS F, Y", (int)$s->when). ", location => $s->location, maxusers => $s->maxusers, active => $s->active ]");
 	header("Location: ".$c->get('index'));
 } else if ($_POST['Action'] == "edit-session") {
 	if (SessionMgr::hasAdminAuth() === FALSE) {
@@ -68,7 +68,8 @@ if ($_POST['Action'] == "create-session") {
 	$changes['location'] = $_POST["Location"];
 	$changes['maxusers'] = $_POST["Maxusers"];
 	$sessions->setAttr($sid, $changes);
-	Logger::logInfo("save-edit-session sid:$sid when: $timestamp location:".$_POST['Location']." maxusers:".$_POST['Maxusers']);
+	$s = $sessions->getSession($sid);
+	SessionMgr::storeMessage("Edited session [ when => ".date("l jS F, Y", (int)$s->when). ", location => $s->location, maxusers => $s->maxusers, active => $s->active ]");
 	header("Location: ".$c->get('index'));
 } else if ($_POST['Action'] == 'open-session') {
 	if (SessionMgr::hasAdminAuth() === FALSE) {
@@ -77,7 +78,8 @@ if ($_POST['Action'] == "create-session") {
 		exit (0);
 	}
 	$sessions->setAttr($sid, array('active' => 'yes'));
-	Logger::logInfo("open-session sid:$sid");
+	$s = $sessions->getSession($sid);
+	SessionMgr::storeMessage("Opened session [ when => ".date("l jS F, Y", (int)$s->when). ", location => $s->location, maxusers => $s->maxusers, active => $s->active ]");
 	header("Location: ".$c->get('index'));
 } else if ($_POST['Action'] == 'close-session') {
 	if (SessionMgr::hasAdminAuth() === FALSE) {
@@ -86,7 +88,8 @@ if ($_POST['Action'] == "create-session") {
 		exit (0);
 	}
 	$sessions->setAttr($sid, array('active' => 'no'));
-	Logger::logInfo("close-session sid:$sid");
+	$s = $sessions->getSession($sid);
+	SessionMgr::storeMessage("Closed session [ when => ".date("l jS F, Y", (int)$s->when). ", location => $s->location, maxusers => $s->maxusers, active => $s->active ]");
 	header("Location: ".$c->get('index'));
 } else if ($_POST['Action'] == 'delete-session') {
 	if (SessionMgr::hasAdminAuth() === FALSE) {
@@ -94,8 +97,10 @@ if ($_POST['Action'] == "create-session") {
 		header("Location: ".$c->get('index'));
 		exit (0);
 	}
+	$s = $sessions->getSession($sid);
+	$message = "Deleted session [ when => ".date("l jS F, Y", (int)$s->when). ", location => $s->location, maxusers => $s->maxusers, active => $s->active ]";
 	$sessions->removeSession($sid);
-	SessionMgr::storeMessage("Deleted session sid:$sid");
+	SessionMgr::storeMessage($message);
 	header("Location: ".$c->get('index'));
 } else if ($_POST['Action'] == 'enrol') {
 	$sessions->enrolUser($sid, SessionMgr::getUsername());

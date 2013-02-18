@@ -53,7 +53,7 @@ if (isset($_POST['Action']) == FALSE) {
 	}
 
 	$bytes = file_put_contents($destFile, $newtext);
-	Logger::logInfo("Saved $bytes bytes to: ".$destFile);
+	Logger::logInfo("[file: $destFile] Saved $bytes bytes");
 	header("Location: ".$c->get('index')."#information");
 } else if ($_POST['Action'] == "save-edit-notices") {
 	if (SessionMgr::hasAdminAuth() === FALSE) {
@@ -66,7 +66,7 @@ if (isset($_POST['Action']) == FALSE) {
 	$destFile = $u->get('notices_file');
 
 	$bytes = file_put_contents($destFile, $newtext);
-	Logger::logInfo("Saved $bytes bytes to: ".$destFile);
+	Logger::logInfo("[file: $destFile] Saved $bytes bytes");
 	header("Location: ".$c->get('index')."#information");
 } else if ($_POST['Action'] == 'cancel') {
 	header("Location: ".$c->get('index'));

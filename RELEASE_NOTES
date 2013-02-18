@@ -1,3 +1,7 @@
+version 2.3.2-exp.16 improved log message format and made them consistent over all functions
+	- customised Logger to fetch username for automatic inclusion in all logging
+	- Logger target now correctly set via config
+
 version 2.3.2-exp.15 made ManageSessions class more self-contained
 	(makes for cleaner code)
 	- added global exception handler

@@ -12,9 +12,9 @@ function getBaseURL($SERVER_HASH) {
 
 function errorPage($errorMessage) {
 	global $u, $c;
-	require_once 'includes/global.php';
-	session_start();
-	SessionMgr::checkForSessionOrLoginOrCookie();
+//	require_once 'includes/global.php';
+//	session_start();
+//	SessionMgr::checkForSessionOrLoginOrCookie();
 
 	$t = prepareTemplateEssentials();
 	$t->errorMessage = $errorMessage;
@@ -156,6 +156,19 @@ function get_notices($file) {
 function getPreviousMonday($date) {
 	$dateArray = getdate($date);
 	return $dateArray[0] - ($dateArray['wday'] - 1) * 86400;
+}
+
+/*
+ * @param sep - separator between key and value)
+ * @param glue - separator between key-sep-value pairs
+ * @array
+ */
+
+function implodeAssoc($sep, $glue, $array) {
+	foreach ($array as $key => $value) {
+		$new[] = "$key$sep$value";
+	}
+	return implode($glue, $new);
 }
 
 ?>

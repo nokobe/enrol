@@ -39,11 +39,11 @@ class Logger {
 		return array_search(self::getLogger()->getLogLevel(), self::$Levels) >= array_search($messageLevel, self::$Levels);
 	}
 
-	static function logFatal($message) { if (self::loggingRequired("FATAL")) { self::getLogger()->logMessage("Fatal: $message"); } }
-	static function logError($message) { if (self::loggingRequired("ERROR")) { self::getLogger()->logMessage("Error: $message"); } }
-	static function logWarn($message) { if (self::loggingRequired("WARN")) { self::getLogger()->logMessage("Warn: $message"); } }
-	static function logInfo($message) { if (self::loggingRequired("INFO")) { self::getLogger()->logMessage("Info: $message"); } }
-	static function logDebug($message) { if (self::loggingRequired("DEBUG")) { self::getLogger()->logMessage("Debug: $message"); } }
+	static function logFatal($message) { if (self::loggingRequired("FATAL")) { self::getLogger()->logMessage("fatal", $message); } }
+	static function logError($message) { if (self::loggingRequired("ERROR")) { self::getLogger()->logMessage("error", $message); } }
+	static function logWarn($message) { if (self::loggingRequired("WARN")) { self::getLogger()->logMessage("warn", $message); } }
+	static function logInfo($message) { if (self::loggingRequired("INFO")) { self::getLogger()->logMessage("info", $message); } }
+	static function logDebug($message) { if (self::loggingRequired("DEBUG")) { self::getLogger()->logMessage("debug", $message); } }
 	static function logTrace($message) { if (self::loggingRequired("TRACE")) {
 		$stackTrace = debug_backtrace();
 
@@ -68,15 +68,22 @@ class Logger {
 		}
 
 
-		self::getLogger()->logMessage("Trace: [$caller$called_from] $message"); }
+		self::getLogger()->logMessage("trace", "[$caller$called_from] $message"); }
 	}
 
-	function logMessage($message) {
-		$logMessage = "[".date(DATE_RFC822)."]";
-		if (isset( $_SERVER['REMOTE_ADDR'] )) {
-			$logMessage .= " [".$_SERVER['REMOTE_ADDR']."]";
-		}
-		$logMessage .= " $message\n";
+	/*
+	 * local customisations:
+	 * 	include in log (if possible):
+	 * 	- REMOTE_ADDR
+	 * 	- SessionMgr::getUsername()
+	 * 	- Admin or User
+	 */
+	function logMessage($level, $message) {
+		$remote = isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : "";
+		$who = SessionMgr::getUsername();
+		$role = SessionMgr::isRegisteredAdmin() ? "admin:" : "user:";
+	
+		$logMessage = "[".date(DATE_RFC822)."] [$level] [$role $who@".$_SERVER['REMOTE_ADDR']."] $message\n";
 
 		file_put_contents($this->logfile, $logMessage, FILE_APPEND | LOCK_EX);
 	}

@@ -14,7 +14,7 @@ require_once 'includes/exception_handler.php';
 #
 
 $c = new ConfigClass; /* system configuration */
-$c->set('version', "version 2.3.2-exp.15");
+$c->set('version', "version 2.3.2-exp.16");
 $c->set('index', 'enrol.php');
 $c->set('base', getBaseURL($_SERVER));
 $c->set('logfmt_date', 'd/m/Y:G:i:s O');
@@ -47,6 +47,6 @@ date_default_timezone_set("Australia/Melbourne");
 error_reporting(E_ALL);
 
 Logger::setLogLevel($u->get('logLevel'));
-Logger::addFileLogger('data/debug.log');
+Logger::addFileLogger($u->get('event_log'));
 
 ?>
