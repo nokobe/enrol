@@ -45,7 +45,7 @@ class Logger {
 	static function logInfo($message) { if (self::loggingRequired("INFO")) { self::getLogger()->logMessage("info", $message); } }
 	static function logDebug($message) { if (self::loggingRequired("DEBUG")) { self::getLogger()->logMessage("debug", $message); } }
 	static function logTrace($message) { if (self::loggingRequired("TRACE")) {
-//		$stackTrace = debug_backtrace(false);
+		$stackTrace = debug_backtrace(false);
 
 		# caller
 		$class = isset($stackTrace[0]["class"]) ? $stackTrace[0]["class"]."::" : "";
@@ -66,24 +66,11 @@ class Logger {
 		else {
 			$called_from = "";
 		}
-
-
 		self::getLogger()->logMessage("trace", "[$caller$called_from] $message"); }
 	}
 
-	/*
-	 * local customisations:
-	 * 	include in log (if possible):
-	 * 	- REMOTE_ADDR
-	 * 	- SessionMgr::getUsername()
-	 * 	- Admin or User
-	 */
 	function logMessage($level, $message) {
-		$remote = isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : "";
-		$who = SessionMgr::getUsername();
-		$role = SessionMgr::isRegisteredAdmin() ? "admin:" : "user:";
-	
-		$logMessage = "[".date(DATE_RFC822)."] [$level] [$role $who@".$_SERVER['REMOTE_ADDR']."] $message\n";
+		$logMessage = "[".date(DATE_RFC822)."] [$level] $message\n";
 
 		file_put_contents($this->logfile, $logMessage, FILE_APPEND | LOCK_EX);
 	}

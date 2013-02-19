@@ -14,6 +14,7 @@
  *	set($var, $value)
  *	storeMessage($msg)
  *	getMessage( )
+ *	haveMessage( )
  */
 
 class SessionMgr {
@@ -144,12 +145,26 @@ class SessionMgr {
 		Logger::logTrace("");
 		if (isset($_SESSION["messages"])) {
 			$type = gettype($_SESSION["messages"]);
-			if (gettype($_SESSION["messages"]) == "array") {
+			if ($type == 'array') {
 				return array_shift( $_SESSION["messages"] );
 			} else {
 				Logger::logWarn("stored message is a $type, not an array!");
 			}
 		}
+	}
+
+	/*
+	 * @return boolean - any messages pending
+	 */
+	function haveMessage() {
+		if (isset($_SESSION["messages"])) {
+			$type = gettype($_SESSION["messages"]);
+			if ($type == 'array') {
+				return count($_SESSION["messages"]) > 0 ? true : false;
+			}
+		}
+
+		return false;
 	}
 }
 

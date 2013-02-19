@@ -17,7 +17,7 @@ $sessions->unenrolUser($sid, $user);
 
 $details = $sessions->describeSession($sid);
 SessionMgr::storeMessage("Admin removed $user from session [ $details ]");
-logAudit(array('action' => 'adminRemove', 'usid' => $sid, 'removed' => $user));
+logAudit(array('action' => 'admin-remove', 'usid' => $sid, 'removed' => $user));
 
 header("Location: ".$c->get('index'));
 

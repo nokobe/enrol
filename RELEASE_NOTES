@@ -1,3 +1,10 @@
+version 3.0.2 minor fixes
+	- removed customisations from Logger Class
+	- switched logInfo to logDebug for a number of calls
+	- reenabled debug_backtrace
+	- fixed modal display not showing up during auth attempt
+	- minor bugfixes
+
 version 3.0.1 Added Audit(log) Class
 	- added function to Sessions Class: describeSession()
 	- added function logAudit, which adds custom fields and then passes to Audit Logger

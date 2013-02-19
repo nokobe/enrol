@@ -52,7 +52,7 @@ if (isset($_POST['Action']) == FALSE) {
 	}
 
 	$bytes = file_put_contents($destFile, $newtext);
-	logAudit(array('action' => 'edit-announcements_file', 'file' => $destFile, 'desc' => "saved $bytes bytes"));
+	logAudit(array('action' => 'edit-announcements', 'file' => $destFile, 'desc' => "saved $bytes bytes"));
 	header("Location: ".$c->get('index')."#information");
 } else if ($_POST['Action'] == "save-edit-notices") {
 	$newtext = $_POST["newnotices"];

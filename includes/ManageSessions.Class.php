@@ -115,7 +115,7 @@ class ManageSessions {
 		$this->xml->nextID = $newID + 1;
 
 		$this->save();
-		Logger::logInfo("[session: $newID] create-session: [ when => '$attributes[when]', location => '".$attributes['location']."', max => '".$attributes['maxusers']."' ]");
+		Logger::logDebug("[session: $newID] create-session: [ when => '$attributes[when]', location => '".$attributes['location']."', max => '".$attributes['maxusers']."' ]");
 		return $newID;
 	}
 
@@ -139,7 +139,7 @@ class ManageSessions {
 		$this->xml = new SimpleXMLElement($dom->saveXML());
 
 		$this->save();
-		Logger::logInfo("[session: $sid] delete-session [ $details ]");
+		Logger::logDebug("[session: $sid] delete-session [ $details ]");
 	}
 
 	function getAttr($sid, $attr) {
@@ -155,7 +155,7 @@ class ManageSessions {
 		}
 		$this->save();
 		$details = implodeAssoc(' => ', ', ', $array);
-		Logger::logInfo("[session: $sid] edit-session [ $details ]");
+		Logger::logDebug("[session: $sid] edit-session [ $details ]");
 	}
 
 	/*
@@ -176,7 +176,7 @@ class ManageSessions {
 		$s->userlist = implode('|', $who);
 
 		$this->save();
-		Logger::logInfo("[session: $sid] enrol $name");
+		Logger::logDebug("[session: $sid] enrol $name");
 	}
 
 	/*
@@ -200,7 +200,7 @@ class ManageSessions {
 		$s->userlist = implode('|', $who);
 
 		$this->save();
-		Logger::logInfo("[session: $sid] unenrol $name");
+		Logger::logDebug("[session: $sid] unenrol $name");
 	}
 
 	function resetUSID() {

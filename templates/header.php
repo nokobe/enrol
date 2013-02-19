@@ -82,8 +82,23 @@ EOT;
     -->
 
 <div class="container-fluid">
-
 EOT;
+
+if (SessionMgr::haveMessage()) {
+	echo '<div class="row-fluid">';
+	echo '<div class="span10 offset2">';
+
+	while (($m = SessionMgr::getMessage()) != "") {
+		echo <<<EOT
+		<div class="alert alert-info">
+		$m
+		<a class="close" data-dismiss="alert" href="#">&times;</a>
+		</div>
+EOT;
+	}
+	echo '</div>';
+	echo '</div>';
+}
 
 # vim:filetype=html
 ?>
