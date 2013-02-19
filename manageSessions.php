@@ -6,12 +6,13 @@ SessionMgr::checkForSessionOrLoginOrCookie();
 if (!isset($_POST['Action']) and !isset($_GET['Action'])) { errorPage("missing Action"); die(); }
 if (!isset($_POST['USID'])) { errorPage("missing USID"); die(); }
 
-$sid = $_POST["USID"];
+$action = $_POST['Action'];
+$sid    = $_POST["USID"];
 
 // ok to call new ManageSessions() now as it doesn't do much but store the data filename
 $sessions = new ManageSessions($u->get('sessions_file'));
 
-if ($_POST['Action'] == "create-session") {
+if ($action == "create-session" or $action == "Create New Session") {
 	if (SessionMgr::hasAdminAuth() === FALSE) {
 		SessionMgr::storeMessage("Permission denied");
 		header("Location: ".$c->get('index'));
@@ -34,7 +35,7 @@ if ($_POST['Action'] == "create-session") {
 	logAudit(array('action' => 'create-session', 'usid' => $sid, 'desc' => $details));
 
 	header("Location: ".$c->get('index'));
-} else if ($_POST['Action'] == "edit-session") {
+} else if ($action == "edit-session" or $action == "Edit Session") {
 	if (SessionMgr::hasAdminAuth() === FALSE) {
 		SessionMgr::storeMessage("Permission denied");
 		header("Location: ".$c->get('index'));
@@ -51,9 +52,9 @@ if ($_POST['Action'] == "create-session") {
 	$t->sessionTime = displayDate((int)$s->when);
 
 	require 'templates/editsession.php';
-} else if ($_POST['Action'] == 'cancel') {
+} else if ($action == 'cancel') {
 	header("Location: ".$c->get('index'));
-} else if ($_POST['Action'] == 'save-edit-session') {
+} else if ($action == 'save-edit-session' or $action == "Save Changes") {
 	if (SessionMgr::hasAdminAuth() === FALSE) {
 		SessionMgr::storeMessage("Permission denied");
 		header("Location: ".$c->get('index'));
@@ -77,7 +78,7 @@ if ($_POST['Action'] == "create-session") {
 	logAudit(array('action' => 'edit-session', 'usid' => $sid, 'desc' => $details));
 
 	header("Location: ".$c->get('index'));
-} else if ($_POST['Action'] == 'open-session') {
+} else if ($action == 'open-session' or $action == "Open Session") {
 	if (SessionMgr::hasAdminAuth() === FALSE) {
 		SessionMgr::storeMessage("Permission denied");
 		header("Location: ".$c->get('index'));
@@ -90,7 +91,7 @@ if ($_POST['Action'] == "create-session") {
 	logAudit(array('action' => 'open-session', 'usid' => $sid, 'desc' => $details));
 
 	header("Location: ".$c->get('index'));
-} else if ($_POST['Action'] == 'close-session') {
+} else if ($action == 'close-session' or $action == "Close Session") {
 	if (SessionMgr::hasAdminAuth() === FALSE) {
 		SessionMgr::storeMessage("Permission denied");
 		header("Location: ".$c->get('index'));
@@ -103,7 +104,7 @@ if ($_POST['Action'] == "create-session") {
 	logAudit(array('action' => 'close-session', 'usid' => $sid, 'desc' => $details));
 
 	header("Location: ".$c->get('index'));
-} else if ($_POST['Action'] == 'delete-session') {
+} else if ($action == 'delete-session' or $action == "Delete Session") {
 	if (SessionMgr::hasAdminAuth() === FALSE) {
 		SessionMgr::storeMessage("Permission denied");
 		header("Location: ".$c->get('index'));
@@ -117,7 +118,7 @@ if ($_POST['Action'] == "create-session") {
 	logAudit(array('action' => 'delete-session', 'usid' => $sid, 'desc' => $details));
 
 	header("Location: ".$c->get('index'));
-} else if ($_POST['Action'] == 'enrol') {
+} else if ($action == 'enrol' or $action == 'Enrol') {
 	if (SessionMgr::isLoggedIn() === FALSE) {
 		SessionMgr::storeMessage("You need to be logged in to enrol");
 		header("Location: ".$c->get('index'));
@@ -128,7 +129,7 @@ if ($_POST['Action'] == "create-session") {
 	logAudit(array('action' => 'enrol', 'usid' => $sid));
 
 	header("Location: ".$c->get('index'));
-} else if ($_POST['Action'] == 'unenrol') {
+} else if ($action == 'unenrol' or $action == 'Un-enrol') {
 	if (SessionMgr::isLoggedIn() === FALSE) {
 		SessionMgr::storeMessage("You need to logged in to unenrol");
 		header("Location: ".$c->get('index'));
@@ -140,7 +141,7 @@ if ($_POST['Action'] == "create-session") {
 
 	header("Location: ".$c->get('index'));
 } else {
-	errorPage('unknown action: '.$_POST['Action']);
+	errorPage('unknown action: '.$action);
 }
 
 # vim:filetype=html:ts=4:sw=4
