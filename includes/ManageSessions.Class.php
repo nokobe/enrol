@@ -9,6 +9,7 @@
  *	save()			- throws exception if save fails
  * $sessions = getSessions($sid)	- get all sessions (sorted by time)
  * $obj = getSession($sid)	- return the session object
+ * $txt = describeSession($sid)	- return a text description of the session
  * $sid = addSession()
  *	removeSession($sid)	- etc
  *	getAttr($sid, $attr)	- NYI
@@ -93,6 +94,12 @@ class ManageSessions {
 		$this->load();
 		list($s) = $this->xml->xpath("/sessions/session[usid=$sid]");
 		return $s;
+	}
+
+	function describeSession($sid) {
+		$this->load();
+		$s = $this->getSession($sid);
+		return "when => ".date("l jS F, Y", (int)$s->when). ", location => $s->location, maxusers => $s->maxusers, active => $s->active";
 	}
 
 	function addSession($attributes) {

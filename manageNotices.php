@@ -52,7 +52,7 @@ if (isset($_POST['Action']) == FALSE) {
 	}
 
 	$bytes = file_put_contents($destFile, $newtext);
-	Logger::logInfo("[file: $destFile] Saved $bytes bytes");
+	logAudit(array('action' => 'edit-announcements_file', 'file' => $destFile, 'desc' => "saved $bytes bytes"));
 	header("Location: ".$c->get('index')."#information");
 } else if ($_POST['Action'] == "save-edit-notices") {
 	$newtext = $_POST["newnotices"];
@@ -60,7 +60,7 @@ if (isset($_POST['Action']) == FALSE) {
 	$destFile = $u->get('notices_file');
 
 	$bytes = file_put_contents($destFile, $newtext);
-	Logger::logInfo("[file: $destFile] Saved $bytes bytes");
+	logAudit(array('action' => 'edit-notices', 'file' => $destFile, 'desc' => "saved $bytes bytes"));
 	header("Location: ".$c->get('index')."#information");
 } else if ($_POST['Action'] == 'cancel') {
 	header("Location: ".$c->get('index'));

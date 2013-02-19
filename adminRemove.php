@@ -14,8 +14,11 @@ $user = $_GET['user'];
 
 $sessions = new ManageSessions($u->get('sessions_file'));
 $sessions->unenrolUser($sid, $user);
-$s = $sessions->getSession($sid);
-SessionMgr::storeMessage("Admin removed $user from session [ when => ".date("l jS F, Y", (int)$s->when). ", location => $s->location, maxusers => $s->maxusers, active => $s->active ]");
+
+$details = $sessions->describeSession($sid);
+SessionMgr::storeMessage("Admin removed $user from session [ $details ]");
+logAudit(array('action' => 'adminRemove', 'usid' => $sid, 'removed' => $user));
+
 header("Location: ".$c->get('index'));
 
 # vim:filetype=html:ts=4:sw=4

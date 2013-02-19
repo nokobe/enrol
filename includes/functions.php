@@ -159,16 +159,21 @@ function getPreviousMonday($date) {
 }
 
 /*
- * @param sep - separator between key and value)
- * @param glue - separator between key-sep-value pairs
- * @array
+ *  add custom fields to audit and then submit to Audit-class logger
+ *  Custom fields:
+ *  	session user
+ *  	user role
+ *  	remote ip
  */
 
-function implodeAssoc($sep, $glue, $array) {
-	foreach ($array as $key => $value) {
-		$new[] = "$key$sep$value";
-	}
-	return implode($glue, $new);
+function logAudit($array) {
+	$array['remote ip'] = isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : "";
+	$array['session user'] = SessionMgr::getUsername();
+	$array['session role'] = SessionMgr::isRegisteredAdmin() ? "admin:" : "user:";
+	$dateArray = getdate();
+	$array['time'] = $dateArray[0];
+
+	Audit::log($array);
 }
 
 ?>

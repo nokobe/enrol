@@ -1,7 +1,9 @@
 <?php
+require_once 'includes/Audit.Class.php';
 require_once 'includes/config.inc.php';
 require_once 'includes/datetime.php';
 require_once 'includes/functions.php';
+require_once 'includes/toolbox.php';
 require_once 'includes/SessionMgr.Class.php';
 require_once 'includes/Config.Class.php';
 require_once 'includes/ManageSessions.Class.php';
@@ -14,7 +16,7 @@ require_once 'includes/exception_handler.php';
 #
 
 $c = new ConfigClass; /* system configuration */
-$c->set('version', "version 3.0");
+$c->set('version', "version 3.0.1");
 $c->set('index', 'enrol.php');
 $c->set('base', getBaseURL($_SERVER));
 $c->set('logfmt_date', 'd/m/Y:G:i:s O');
@@ -41,6 +43,7 @@ $u->set('sessions_file', "data/".$config_sessions_data_file);
 $u->set('notices_file', "data/".$config_notices_file);
 $u->set('announcements_file', "data/".$config_announcements_file);
 $u->set('event_log', "data/".$config_log_file);
+$u->set('audit_log', "data/".$config_audit_file);
 
 date_default_timezone_set("Australia/Melbourne");
 
@@ -48,5 +51,7 @@ error_reporting(E_ALL);
 
 Logger::setLogLevel($u->get('logLevel'));
 Logger::addFileLogger($u->get('event_log'));
+
+Audit::setAuditFile($u->get('audit_log'));
 
 ?>

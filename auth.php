@@ -19,9 +19,11 @@ if ( isset($_POST['auth-submit'])) {
 	if (authUser(SessionMgr::getUsername(), md5($_POST['password']))) {
 		SessionMgr::grantAdminAuth();
 		SessionMgr::set('adminView', 1);
+		logAudit(array('action' => 'auth-submit', 'status' => 'pass'));
 		header("Location: ".$c->get('index'));
 	} else {
 		SessionMgr::storeMessage("Incorrect password");
+		logAudit(array('action' => 'auth-submit', 'status' => 'fail'));
 		header("Location: auth.php");
 		exit(0);
 	}

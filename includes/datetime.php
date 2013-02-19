@@ -61,9 +61,5 @@
       $result .= '</select>';
 			return $result;
     }
-
-	function isAssoc($array) {
-		return array_values($array) === $array ? FALSE : TRUE;
-	}
 	# vim:filetype=html:ts=2:sw=2
 ?>

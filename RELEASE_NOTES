@@ -1,3 +1,10 @@
+version 3.0.1 Added Audit(log) Class
+	- added function to Sessions Class: describeSession()
+	- added function logAudit, which adds custom fields and then passes to Audit Logger
+	  (goal here is to strip customisation of Logger - Logger was trying to add custom
+	  information, but the calls to get that info were themselves logging...)
+	- put stand-alone utility functions into toolbox.php
+
 version 3.0 rebadged version 2.3.2-exp.17 ready for release
 
 version 2.3.2-exp.17 minor tweaks preparing for major release

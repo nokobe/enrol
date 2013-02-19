@@ -28,8 +28,11 @@ if ($_POST['Action'] == "create-session") {
 	$sid = $sessions->addSession(
 		array( "active" => "no", "when" => $timestamp, "location" => $_POST["Location"], "maxusers" => $_POST["Maxusers"] )
 	);
-	$s = $sessions->getSession($sid);
-	SessionMgr::storeMessage("Created session [ when => ".date("l jS F, Y", (int)$s->when). ", location => $s->location, maxusers => $s->maxusers, active => $s->active ]");
+
+	$details = $sessions->describeSession($sid);
+	SessionMgr::storeMessage("Created session [ $details ]");
+	logAudit(array('action' => 'create-session', 'usid' => $sid, 'desc' => $details));
+
 	header("Location: ".$c->get('index'));
 } else if ($_POST['Action'] == "edit-session") {
 	if (SessionMgr::hasAdminAuth() === FALSE) {
@@ -68,8 +71,11 @@ if ($_POST['Action'] == "create-session") {
 	$changes['location'] = $_POST["Location"];
 	$changes['maxusers'] = $_POST["Maxusers"];
 	$sessions->setAttr($sid, $changes);
-	$s = $sessions->getSession($sid);
-	SessionMgr::storeMessage("Edited session [ when => ".date("l jS F, Y", (int)$s->when). ", location => $s->location, maxusers => $s->maxusers, active => $s->active ]");
+
+	$details = $sessions->describeSession($sid);
+	SessionMgr::storeMessage("Edited session [ $details ]");
+	logAudit(array('action' => 'edit-session', 'usid' => $sid, 'desc' => $details));
+
 	header("Location: ".$c->get('index'));
 } else if ($_POST['Action'] == 'open-session') {
 	if (SessionMgr::hasAdminAuth() === FALSE) {
@@ -78,8 +84,11 @@ if ($_POST['Action'] == "create-session") {
 		exit (0);
 	}
 	$sessions->setAttr($sid, array('active' => 'yes'));
-	$s = $sessions->getSession($sid);
-	SessionMgr::storeMessage("Opened session [ when => ".date("l jS F, Y", (int)$s->when). ", location => $s->location, maxusers => $s->maxusers, active => $s->active ]");
+
+	$details = $sessions->describeSession($sid);
+	SessionMgr::storeMessage("Opened session [ $details ]");
+	logAudit(array('action' => 'open-session', 'usid' => $sid, 'desc' => $details));
+
 	header("Location: ".$c->get('index'));
 } else if ($_POST['Action'] == 'close-session') {
 	if (SessionMgr::hasAdminAuth() === FALSE) {
@@ -88,8 +97,11 @@ if ($_POST['Action'] == "create-session") {
 		exit (0);
 	}
 	$sessions->setAttr($sid, array('active' => 'no'));
-	$s = $sessions->getSession($sid);
-	SessionMgr::storeMessage("Closed session [ when => ".date("l jS F, Y", (int)$s->when). ", location => $s->location, maxusers => $s->maxusers, active => $s->active ]");
+
+	$details = $sessions->describeSession($sid);
+	SessionMgr::storeMessage("Closed session [ $details ]");
+	logAudit(array('action' => 'close-session', 'usid' => $sid, 'desc' => $details));
+
 	header("Location: ".$c->get('index'));
 } else if ($_POST['Action'] == 'delete-session') {
 	if (SessionMgr::hasAdminAuth() === FALSE) {
@@ -97,10 +109,13 @@ if ($_POST['Action'] == "create-session") {
 		header("Location: ".$c->get('index'));
 		exit (0);
 	}
-	$s = $sessions->getSession($sid);
-	$message = "Deleted session [ when => ".date("l jS F, Y", (int)$s->when). ", location => $s->location, maxusers => $s->maxusers, active => $s->active ]";
+	$details = $sessions->describeSession($sid);
+
 	$sessions->removeSession($sid);
-	SessionMgr::storeMessage($message);
+
+	SessionMgr::storeMessage("Deleted session [ $details ]");
+	logAudit(array('action' => 'delete-session', 'usid' => $sid, 'desc' => $details));
+
 	header("Location: ".$c->get('index'));
 } else if ($_POST['Action'] == 'enrol') {
 	if (SessionMgr::isLoggedIn() === FALSE) {
@@ -109,6 +124,9 @@ if ($_POST['Action'] == "create-session") {
 		exit (0);
 	}
 	$sessions->enrolUser($sid, SessionMgr::getUsername());
+
+	logAudit(array('action' => 'enrol', 'usid' => $sid));
+
 	header("Location: ".$c->get('index'));
 } else if ($_POST['Action'] == 'unenrol') {
 	if (SessionMgr::isLoggedIn() === FALSE) {
@@ -117,6 +135,9 @@ if ($_POST['Action'] == "create-session") {
 		exit (0);
 	}
 	$sessions->unenrolUser($sid, SessionMgr::getUsername());
+
+	logAudit(array('action' => 'unenrol', 'usid' => $sid));
+
 	header("Location: ".$c->get('index'));
 } else {
 	errorPage('unknown action: '.$_POST['Action']);

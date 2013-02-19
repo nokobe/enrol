@@ -45,7 +45,7 @@ class Logger {
 	static function logInfo($message) { if (self::loggingRequired("INFO")) { self::getLogger()->logMessage("info", $message); } }
 	static function logDebug($message) { if (self::loggingRequired("DEBUG")) { self::getLogger()->logMessage("debug", $message); } }
 	static function logTrace($message) { if (self::loggingRequired("TRACE")) {
-		$stackTrace = debug_backtrace();
+//		$stackTrace = debug_backtrace(false);
 
 		# caller
 		$class = isset($stackTrace[0]["class"]) ? $stackTrace[0]["class"]."::" : "";
