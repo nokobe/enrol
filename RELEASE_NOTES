@@ -1,3 +1,5 @@
+version 3.0.6 bugfix. logged session details included date not time!
+
 version 3.0.5 fixed IE7 admin mode button issue
 	- answer: update readme to say it doesn't work in IE7
 

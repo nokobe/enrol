@@ -99,7 +99,7 @@ class ManageSessions {
 	function describeSession($sid) {
 		$this->load();
 		$s = $this->getSession($sid);
-		return "when => ".date("l jS F, Y", (int)$s->when). ", location => $s->location, maxusers => $s->maxusers, active => $s->active";
+		return "when => ".date('g:ia \o\n l jS F, Y', (int)$s->when). ", location => $s->location, maxusers => $s->maxusers, active => $s->active";
 	}
 
 	function addSession($attributes) {

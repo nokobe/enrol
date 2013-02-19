@@ -16,7 +16,7 @@ require_once 'includes/exception_handler.php';
 #
 
 $c = new ConfigClass; /* system configuration */
-$c->set('version', "version 3.0.5");
+$c->set('version', "version 3.0.6");
 $c->set('index', 'enrol.php');
 $c->set('base', getBaseURL($_SERVER));
 $c->set('logfmt_date', 'd/m/Y:G:i:s O');
