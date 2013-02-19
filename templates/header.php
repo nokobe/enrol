@@ -61,6 +61,7 @@ EOT;
 		<form class="navbar-form form-inline pull-right" method="post" action="$t->loginpost">
 		<input type="text" class="span2" placeholder="Enter Your Name" name="Name" value="$t->username">
 		<button type="submit" class="btn" name="submit-login" value="Sign In">Sign in</button>
+		<input type="hidden" name="submit-login-ie" value="Sign in">
 		<label class="checkbox">
 			<input type="checkbox" name="rememberMe" value="1"> Remember me
 		</label>

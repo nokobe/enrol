@@ -99,7 +99,7 @@ class SessionMgr {
 			}
 			return;
 		}
-		if (isset($_POST['submit-login']) and isset($_POST['Name'])) {
+		if ((isset($_POST['submit-login']) or isset($_POST['submit-login-ie'])) and isset($_POST['Name'])) {
 			SessionMgr::login($_POST['Name'], isset($_POST['rememberMe']) ? 1 : 0);
 			return;
 		}
