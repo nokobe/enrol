@@ -1,3 +1,6 @@
+version 3.0.5 fixed IE7 admin mode button issue
+	- answer: update readme to say it doesn't work in IE7
+
 version 3.0.4 fixed IE7/IE8 login issue
 
 version 3.0.3 fixed IE7/IE8 button issue

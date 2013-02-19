@@ -1,13 +1,15 @@
 Non-authenticated enrolment program
 Language: php
 
-New Version:
+Version: 3
 
-	Features:
+Features:
 
 	Adaptive layout adjusts to your screen, tablet or phone
 	Clean layout and easy to use layout and functions
 	Password-protected admin account access
+	An audit log is kept, which logs amongst other things:
+		session user, user's role, remote IP and details of the action
 
 Admin Usage
 
@@ -15,9 +17,8 @@ Admin Usage
 	Easy to add new sessions
 	Session can easily be set to Open (visible), Closed (Invisible) or Deleted
 	Sessions are automatically shown in date order
-	An event log is kept, which matches each operation to an IP address
 
-User usage
+User Usage
 
 	Very simply and straight-foward for the user to enrol/unenroll in sessions
 	User simply sets their name, (which is kept in a cookie), then
@@ -29,3 +30,8 @@ Other Notes
 	However, if there are no sessions in the database, the program will offer
 	the option to reset the SessionID to 1. However, this should be use
 	discretion using this option.
+
+Known Issues
+
+	Admin Mode button does not work in IE7
+	The reset session ID functionality has not been completed
