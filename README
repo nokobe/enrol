@@ -16,7 +16,8 @@ Admin Usage
 	Simple configuration file for easily customisating and deployment
 	Easy to add new sessions
 	Session can easily be set to Open (visible), Closed (Invisible) or Deleted
-	Sessions are automatically shown in date order
+	Alternatively, you can configure the autoopen and/or autoclose scripts to
+		handle the session opens and closes.
 
 User Usage
 
@@ -28,10 +29,12 @@ Other Notes
 
 	To avoid conflicts, the Session ID is ALWAYS incremented for new sessions.
 	However, if there are no sessions in the database, the program will offer
-	the option to reset the SessionID to 1. However, this should be use
+	the option to reset the SessionID to 1 (*). However, this should be use
 	discretion using this option.
+	(*) Version 3.0 - SessionID reset has not yet been implemented
 
 Known Issues
 
 	Admin Mode button does not work in IE7
-	The reset session ID functionality has not been completed
+	Probably (untested) Edit Notes/Annoucements does not work in IE7
+	The reset session ID functionality has not been completed in version 3 yet.

@@ -155,7 +155,19 @@ function get_notices($file) {
 
 function getPreviousMonday($date) {
 	$dateArray = getdate($date);
-	return $dateArray[0] - ($dateArray['wday'] - 1) * 86400;
+	return $dateArray[0] - ($dateArray['wday'] - 1) * DAYSEC;
+}
+
+function prevMidnight() {
+	$date = getdate();
+	return $date[0]
+		- $date['hours'] * 3600
+		- $date['minutes'] * 60
+		- $date['seconds'];
+}
+
+function nextMidnight() {
+	return prevMidnight() + DAYSEC;
 }
 
 /*

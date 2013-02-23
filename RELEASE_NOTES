@@ -1,3 +1,7 @@
+version 3.0.7 added autoopen/autoclose functions
+	- php scripts intended to be run from cron. Will auto-open and auto-close
+	  your sessions based on corresponding config values
+
 version 3.0.6 bugfix. logged session details included date not time!
 
 version 3.0.5 fixed IE7 admin mode button issue

@@ -1,4 +1,8 @@
 <?php
+
+define("DAYSEC", 86400); /* number of seconds in one day */
+
+
 require_once 'includes/Audit.Class.php';
 require_once 'includes/config.inc.php';
 require_once 'includes/datetime.php';
@@ -16,7 +20,7 @@ require_once 'includes/exception_handler.php';
 #
 
 $c = new ConfigClass; /* system configuration */
-$c->set('version', "version 3.0.6");
+$c->set('version', "version 3.0.7");
 $c->set('index', 'enrol.php');
 $c->set('base', getBaseURL($_SERVER));
 $c->set('logfmt_date', 'd/m/Y:G:i:s O');
@@ -38,6 +42,8 @@ $u->set('max_enrolments_per_line', $config_max_enrolments_per_line);
 $u->set('on_production', $config_on_production);
 $u->set('forceAdminAuth', $config_force_admin_auth);
 $u->set('logLevel', $config_log_level);
+$u->set('autoopen', $config_auto_open);
+$u->set('autoclose', $config_auto_close);
 
 $u->set('sessions_file', "data/".$config_sessions_data_file);
 $u->set('notices_file', "data/".$config_notices_file);
