@@ -1,0 +1,39 @@
+$header()$
+<h3>$breadcrumb$</h3>
+<div class="row-fluid">
+<div class="span9 well">
+	<form class="form-inline" method="post" action="$post$">
+		<button type="submit" class="btn btn-small btn-danger" name="search-all-submit" value="true">Show All</button>
+	</form>
+	<br />
+	<form class="form-inline" method="post" action="$post$">
+		$searchDropdown()$
+		equals
+		<input type="text" name="searchText" value=$searchText$>
+		<label class="checkbox">
+	$if(searchExactMatch)$
+		<input type="checkbox" name="exact-match" value="exact-match" checked> Exact match
+	$else$
+		<input type="checkbox" name="exact-match" value="exact-match"> Exact match
+	$endif$
+		</label>
+		<button type="submit" class="btn btn-small btn-success" name="search-submit" value="true">Search</button>
+		<input type="hidden" name="search-submit-ie" value="true">
+	</form>
+</div>
+<div class="span3 alert alert-info"><i class="icon-info-sign"></i> When Exact match is off, you can search for multiple matches using a pipe (|) separator. eg: user1|user2</div>
+</div>
+
+$if(results)$
+Showing $total$ results 
+<table class="table table-condensed table-striped">
+<tr>
+	$tableHeading:{h|<th>$h$</th>}$
+</tr>
+$results:{r|<tr><td>$r[time]$</td><td>$r[action]$</td><td>$r[status]$</td><td>$r[session user]$</td><td>$r[session role]$</td><td>$r[remote ip]$</td><td>$r[desc]$</td><td>$r[usid]$</td></tr>}$
+</table>
+$endif$
+
+<a href="$home$">Home</a>
+
+$footer()$

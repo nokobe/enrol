@@ -1,0 +1,37 @@
+<select name="searchField">
+$if(searchAction)$
+	<option value="action" selected>Action</option>
+$else$
+	<option value="action">Action</option>
+$endif$
+$if(searchStatus)$
+	<option value="status" selected>Status</option>
+$else$
+	<option value="status">Status</option>
+$endif$
+$if(searchUser)$
+	<option value="session user" selected>User</option>
+$else$
+	<option value="session user">User</option>
+$endif$
+$if(searchRole)$
+	<option value="session role" selected>Role</option>
+$else$
+	<option value="session role">Role</option>
+$endif$
+$if(searchRemote)$
+	<option value="remote ip" selected>Remote IP</option>
+$else$
+	<option value="remote ip">Remote IP</option>
+$endif$
+$if(searchDesc)$
+	<option value="desc" selected>Description</option>
+$else$
+	<option value="desc">Description</option>
+$endif$
+$if(searchID)$
+	<option value="usid" selected>Session ID</option>
+$else$
+	<option value="usid">Session ID</option>
+$endif$
+</select>

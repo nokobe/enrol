@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="author" content="http://github.com/nokobe">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="$base$/css/bootstrap.min.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<link rel="stylesheet" href="$base$/css/bootstrap-responsive.min.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<link rel="stylesheet" href="$base$/css/main.css" type="text/css" media="screen" title="no title" charset="utf-8">
+	<script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+	<title>
+		$title$
+	</title>
+	</link>
+</head>
+<body>
+
+    <!-- begin NAV BAR -->
+
+    <div class="navbar navbar-fixed-top navbar-inverse">
+      <div class="navbar-inner">
+        <div class="container">
+		<a class="brand" href="$home$">$title$</a>
+		<!--          <div class="nav-collapse collapse">-->
+	<div class="pull-right">
+		
+	$if(loggedIn)$
+		<p class="navbar-text pull-right">
+		Logged in as <a href="#" class="navbar-link">$username$</a> <a href="logout.php">Logout</a>
+		</p>
+	$else$
+		<form class="navbar-form form-inline pull-right" method="post" action="$loginpost$">
+		<input type="text" class="span2" placeholder="Enter Your Name" name="Name" value="$username$">
+		<button type="submit" class="btn" name="submit-login" value="Sign In">Sign in</button>
+		<input type="hidden" name="submit-login-ie" value="Sign in">
+		<label class="checkbox">
+			<input type="checkbox" name="rememberMe" value="1"> Remember me
+		</label>
+		</form>
+	$endif$
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <!-- end NAV BAR -->
+
+    <!--
+    <div class="visible-phone">phone</div>
+    <div class="visible-tablet">tablet</div>
+    <div class="visible-desktop">desktop</div>
+    -->
+
+<div class="container-fluid">
+	$if(haveMessages)$
+	echo '<div class="row-fluid">';
+	echo '<div class="span10 offset2">';
+	$messages:alert(m)$
+	echo '</div>';
+	echo '</div>';
+	$endif$
