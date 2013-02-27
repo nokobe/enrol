@@ -2,11 +2,17 @@
 require_once 'includes/global.php';
 
 $opts = getopt("vh");
-$verbose = isset($opts['v']) ? true : false;
+$liverun = isset($opts['n']) ? false : true;
+$verbose = (!$liverun) or (isset($opts['v']) ? true : false);
 if (isset($opts['h'])) {
-	die("Usage: ".basename($argv[0])." [-v(erbose)] [-h(elp)]\n");
+	die("Usage: ".basename($argv[0])." [-v(erbose)] [-n(dry-run)] [-h(elp)]\n(-n implis -v)\n");
 }
 
+if (!$liverun) {
+	print "Dry run only\n";
+}
+print "WTF\n";
+exit(0);
 $sessions = new ManageSessions($u->get('sessions_file'));
 if ($u->get('autoclose') >= 0) {
 	$autocloseDate = prevMidnight() - $u->get('autoclose') * DAYSEC;
@@ -14,9 +20,11 @@ if ($u->get('autoclose') >= 0) {
 	foreach ($sessions->getSessions() as $s) {
 		$sid = (int)$s->usid;
 		if ($s->active == 'yes' and $s->when < $autocloseDate) {
-			$sessions->setAttr($sid, array('active' => 'no'));
-			$details = $sessions->describeSession($sid);
-			logAudit(array('action' => 'auto-close-session', 'usid' => $sid, 'desc' => $details));
+			if ($liverun) {
+				$sessions->setAttr($sid, array('active' => 'no'));
+				$details = $sessions->describeSession($sid);
+				logAudit(array('action' => 'auto-close-session', 'usid' => $sid, 'desc' => $details));
+			}
 			if ($verbose) {
 				print "auto closed session $sid: $details\n";
 			}

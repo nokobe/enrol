@@ -1,12 +1,16 @@
 <?php
 require_once 'includes/global.php';
 
-$opts = getopt("vh");
-$verbose = isset($opts['v']) ? true : false;
+$opts = getopt("vnh");
+$liverun = isset($opts['n']) ? false : true;
+$verbose = (!$liverun) or (isset($opts['v']) ? true : false);
 if (isset($opts['h'])) {
-	die("Usage: ".basename($argv[0])." [-v(erbose)] [-h(elp)]\n");
+	die("Usage: ".basename($argv[0])." [-v(erbose)] [-n(dry-run)] [-h(elp)]\n(-n implis -v)\n");
 }
 
+if (!$liverun) {
+	print "Dry run only\n";
+}
 $sessions = new ManageSessions($u->get('sessions_file'));
 if ($u->get('autoopen') >= 0) {
 	$autoopenDate = nextMidnight() + $u->get('autoopen') * DAYSEC;
@@ -15,9 +19,11 @@ if ($u->get('autoopen') >= 0) {
 	foreach ($sessions->getSessions() as $s) {
 		$sid = (int)$s->usid;
 		if ($s->active == 'no' and $s->when > $now[0] and $s->when < $autoopenDate) {
-			$sessions->setAttr($sid, array('active' => 'yes'));
-			$details = $sessions->describeSession($sid);
-			logAudit(array('action' => 'auto-open-session', 'usid' => $sid, 'desc' => $details));
+			if ($liverun) {
+				$sessions->setAttr($sid, array('active' => 'yes'));
+				$details = $sessions->describeSession($sid);
+				logAudit(array('action' => 'auto-open-session', 'usid' => $sid, 'desc' => $details));
+			}
 			if ($verbose) {
 				print "auto opened session $sid: $details\n";
 			}
