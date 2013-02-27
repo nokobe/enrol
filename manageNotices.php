@@ -21,6 +21,7 @@ if (isset($_POST['Action']) == FALSE) {
 			$t->rawNotices = file_get_contents( $u->get('notices_file') );
 			$t->information = "Notices are shown in the Notices tab only";
 			$t->post = "manageNotices.php";
+			$t->breadcrumb = "Edit Notices";
 			$t->target = "notices";
 			require 'templates/editNotices.php';
 		} else if ($target == "announcements") {
@@ -29,6 +30,7 @@ if (isset($_POST['Action']) == FALSE) {
 			$t->rawNotices = file_get_contents( $u->get('announcements_file') );
 			$t->information = "Announcements are always shown at the top of the page";
 			$t->post = "manageNotices.php";
+			$t->breadcrumb = "Edit Annoucements";
 			$t->target = "announcements";
 			require 'templates/editNotices.php';
 		} else {

@@ -8,7 +8,7 @@ require "templates/header.php";
  */
 
 echo <<<EOF
-<h2>$t->heading</h2>
+<h3>$t->heading</h3>
 <form class="form-horizontal" method="post" action="$t->post">
 	<div class="control-group">
 		<label class="control-label" for="inputEmail">Name</label>

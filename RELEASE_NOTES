@@ -1,3 +1,16 @@
+version 3.0.8 tidied up code + minor style and layout tweaks
+	- removed redundant functions from enrol.php - use session functions within ManageSessions
+	- change admin-remove log to put details of removed user into "desc", not "removed"
+	- also, changed log action from admin-remove to admin-unenrol
+	- cleaned up config file (prettified)
+	- cleaned up unused/old config values
+	- add config for logo image
+	- add config for use-logo-image
+	- page headings now all same size
+	- tweaked Audit search to be able to search on regex, not just exact match
+	- removed ":" when logging details of "admin" and/or "user"
+	- minor tweaks to the style and layout
+
 version 3.0.7 added autoopen/autoclose functions
 	- php scripts intended to be run from cron. Will auto-open and auto-close
 	  your sessions based on corresponding config values

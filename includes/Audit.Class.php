@@ -56,15 +56,29 @@ class Audit {
 		return array_values($array) === $array ? FALSE : TRUE;
 	}
 
-	static function search($key, $value) {
+	static function search($key, $operator, $value) {
 		$result = array();
 		$fh = fopen(self::getLogger()->auditLogFile, 'r');
 		$line = trim(fgets($fh));
 		while (!feof($fh)) {
 			list($when, $json) = explode('::', $line, 2);
 			$tmp = json_decode($json, true);
-			if ($key == '' or (isset($tmp[$key]) and $tmp[$key] == $value)) {
-				$result[] = $tmp;
+			/* bugfix: role accidently suffixed with ':' */
+			if (isset($tmp['session role'])) {
+				if (preg_match("/:$/", $tmp['session role'])) {
+					$tmp['session role'] = preg_replace("/:$/", '', $tmp['session role']);
+				}
+			}
+			if ($operator == "equals") {
+				if ($key == '' or (isset($tmp[$key]) and strcasecmp($tmp[$key], $value) == 0)) {
+					$result[] = $tmp;
+				}
+			} elseif ($operator == "contains") {
+				if ($key == '' or (isset($tmp[$key]) and preg_match("/$value/i", $tmp[$key]))) {
+					$result[] = $tmp;
+				}
+			} else {
+				throw new Exception("Audit::search: illegal operator: $operator");
 			}
 			$line = trim(fgets($fh));
 		}

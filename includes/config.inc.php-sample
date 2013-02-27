@@ -1,33 +1,32 @@
 <?php
 
+/* General */
+
 $config_title = "Set Your Title";
 $config_admin_users = array("{name}" => "{md5PasswordHash}", ...);
 $config_default_session_size = 8;
-$config_max_enrolments_per_line = 8;
+$config_force_admin_auth = 1;	/* require admin users to authenticate (=1) immediately on login or (=0) when "admin mode" activated */
+
+/* Data Files (reside in data/ directory) */
+
 $config_sessions_data_file = "sessions.xml";
 $config_notices_file = "notices.txt";
 $config_announcements_file = "announcements.txt";
 $config_log_file = "system.log";
 $config_audit_file = "audit.log";
-$config_force_admin_auth = 1;	# require admin users to authenticate immediately on login
 
-# HEADER STYLE 1 - re-print header every N sessions
-$config_page_header_frequency = 0; // how often to RE-print the table header (0 == never)
+/* Logo/Image File (resides in the "img" directory) */
 
-# HEADER STYLE 2 - re-print header after each weekly message
-$config_print_weekly_title = TRUE; // if TRUE, will print a message before each new week of sessions
-$config_print_header_after_weekly_title = TRUE; // this goes well with weekly_title(ON) and header_freqency(0)
+$config_use_logo = true;
+$config_logo = "logo.png";
 
-/* Colours */
+/* Auto session open/close */
 
-$config_colour_me = "lightgreen";
-$config_colour_them ="lightgrey";
-$config_colour_none = "white";
-$config_colour_table_header = "lightblue";
+$config_auto_open = 3;		/* applicable whenever autoopen is run */
+$config_auto_close = 0;		/* applicable whenever autoclose is run */
 
 /* Technical */
 
-$config_show_session_id = FALSE;	/* can be useful to turn on for diagnostics */
-$config_on_production = TRUE;
-$config_log_level = "DEBUG";
+$config_on_production = TRUE;		/* currently not used */
+$config_log_level = "INFO";
 ?>

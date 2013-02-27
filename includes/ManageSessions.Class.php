@@ -16,9 +16,9 @@
  *	setAttr($sid, $array)	- set the attributes in the given session
  *	enrolUser($sid, $name)	- enrol user in given session
  *	unenrolUser($sid, $name)	- unenrol user in given session
- *	isUserEnrolled($session, $user)	- etc
+ *	userIsEnrolled($session, $user)	- etc
  *	getClassSize($session)	- etc
- *	isClassFull($session)	- etc
+ *	classIsFull($session)	- etc
  *	getEnrolled($session)	- etc
  *	resetUSID		- NYI
  * 	
@@ -165,10 +165,10 @@ class ManageSessions {
 		$this->load();
 
 		$s = $this->getSession($sid);
-		if ($this->isUserEnrolled($s, $name)) {
+		if ($this->userIsEnrolled($s, $name)) {
 			throw new Exception('already enrolled');
 		}
-		if ($this->isClassFull($s)) {
+		if ($this->classIsFull($s)) {
 			throw new Exception('class is full');
 		}
 		$who = $this->getEnrolled($s);
@@ -186,7 +186,7 @@ class ManageSessions {
 		$this->load();
 
 		$s = $this->getSession($sid);
-		if (! $this->isUserEnrolled($s, $name)) {
+		if (! $this->userIsEnrolled($s, $name)) {
 			throw new Exception('not enrolled');
 		}
 		$who = $this->getEnrolled($s);
@@ -214,7 +214,10 @@ class ManageSessions {
 		}
 	}
 
-	function isUserEnrolled($session, $user) {
+	/* The session "object" itself doesn't have it's own class (for legacy reasons),
+	 * so we just provide a bunch of static functions to mimic a real class :) */
+
+	static function userIsEnrolled($session, $user) {
 		if ($session->userlist == "") {
 			return FALSE;
 		}
@@ -222,18 +225,18 @@ class ManageSessions {
 		return array_search($user, $users) === FALSE ? FALSE : TRUE;
 	}
 
-	function getClassSize($session) {
+	static function getClassSize($session) {
 		if ($session->userlist == "") {
 			return 0;
 		}
 		return count(explode("|", $session->userlist));
 	}
 
-	function isClassFull($session) {
-		return $session->maxusers == $this->getClassSize($session);
+	static function classIsFull($session) {
+		return $session->maxusers == ManageSessions::getClassSize($session);
 	}
 
-	function getEnrolled($session) {
+	static function getEnrolled($session) {
 		if ($session->userlist == "") {
 			return array();
 		}

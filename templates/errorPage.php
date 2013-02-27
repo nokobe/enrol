@@ -2,7 +2,7 @@
 require "templates/header.php";
 
 echo <<<EOT
-<h2>We're sorry but an error has occured</h2>
+<h3>We're sorry but an error has occured</h3>
 <div class="well">
 $t->errorMessage
 </div>

@@ -181,7 +181,7 @@ function nextMidnight() {
 function logAudit($array) {
 	$array['remote ip'] = isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : "";
 	$array['session user'] = SessionMgr::getUsername();
-	$array['session role'] = SessionMgr::isRegisteredAdmin() ? "admin:" : "user:";
+	$array['session role'] = SessionMgr::isRegisteredAdmin() ? "admin" : "user";
 	$dateArray = getdate();
 	$array['time'] = $dateArray[0];
 

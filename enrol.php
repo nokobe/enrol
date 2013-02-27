@@ -1,7 +1,6 @@
 <?php
 
 require_once 'includes/global.php';
-$status = array();			// for sending alerts to the user
 session_start();
 SessionMgr::checkForSessionOrLoginOrCookie();
 
@@ -18,13 +17,13 @@ $t->adminView = SessionMgr::get('adminView');
 $t->hideClosedSessions = SessionMgr::get('hideClosedSessions');
 $t->announcements = get_notices($u->get('announcements_file'));
 $t->notices = get_notices($u->get('notices_file'));
+$t->use_logo = $u->get('use_logo');
+$t->logo = $u->get('logo');
 $t->sessions = prepareSessionData();
 require "templates/main.php";
 exit(0);
 
 /* }} ======================= END MAIN PAGE ======================= */
-
-/* ======================= FUNCTIONS ======================= */
 
 function prepareSessionData() {
 	global $c, $u;
@@ -52,7 +51,7 @@ function prepareSessionData() {
 		$xo->when = (int)$s->when;
 		$xo->whenstr = displayDate($s->when);
 		$xo->location = (string)$s->location;
-		$xo->classSize = classSize($s);
+		$xo->classSize = ManageSessions::getClassSize($s);
 		$xo->maxClassSize = (int)$s->maxusers;
 
 		$xo->numelements = ceil($xo->maxClassSize / 6) * 6;
@@ -72,16 +71,16 @@ function prepareSessionData() {
 			if (!$isActive) { $xo->sessionops[] = '<button class="btn btn-small" type="submit" name="Action" value="delete-session" onclick="return confirm(\"Are you Sure\");">Delete Session</button>'; }
 		}
 		if ($isActive and $isLoggedIn) {
-			if (userIsEnrolled($user, $s)) {
+			if (ManageSessions::userIsEnrolled($s, $user)) {
 				$xo->sessionops[] = '<button class="btn btn-small btn-danger" type="submit" name="Action" value="unenrol">Un-enrol</button>'; 
 			} else {
-				if (!classIsFull($s)) {
+				if (!ManageSessions::classIsFull($s)) {
 					 $xo->sessionops[] = '<button class="btn btn-small btn-success" type="submit" name="Action" value="enrol">Enrol</button>';
 				}
 			}
 		}
 		$xo->users = array();
-		foreach (enrolled($s) as $who) {
+		foreach (ManageSessions::getEnrolled($s) as $who) {
 			$adminRemove = '<a href="adminRemove.php?sid='.$xo->usid.'&user='.urlencode($who).'" alt="admin remove user"><i class="icon-trash"></i></a>';
 			if ($who == $user) {
 				if ($isRegisteredAdmin and $adminView) {
@@ -100,32 +99,6 @@ function prepareSessionData() {
 		$x[] = $xo;
 	}
 	return $x;
-}
-
-function userIsEnrolled($user, $s) {
-	if ($s->userlist == "") {
-		return 0;
-	}
-	$users = explode("|", $s->userlist);
-	return array_search($user, $users) === FALSE ? FALSE : TRUE;
-}
-
-function classSize($s) {
-	if ($s->userlist == "") {
-		return 0;
-	}
-	return count(explode("|", $s->userlist));
-}
-
-function classIsFull($s) {
-	return $s->maxusers == classSize($s);
-}
-
-function enrolled($s) {
-	if ($s->userlist == "") {
-		return array();
-	}
-	return explode("|", $s->userlist);
 }
 
 ?>

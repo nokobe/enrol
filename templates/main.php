@@ -6,6 +6,7 @@
  *		$t->hideClosedSessions
  *		$t->notices
  *		$t->sessions
+ *		$t->logo
  */
 
 require "templates/header.php";
@@ -18,15 +19,22 @@ if ($t->activetab == "sessions") {
 	$notices_pane_active = 'active';
 }
 
+if ($t->use_logo) {
 echo <<<EOT
 	<div class="row-fluid" >
 		<div class="span2 hidden-phone">
 			<div>
-				<img class="media-object" src="yoga.jpg">
+				<img class="media-object" src="$t->logo">
 			</div>
 		</div>
 		<div class="span10">
 EOT;
+} else {
+echo <<<EOT
+	<div class="row-fluid" >
+		<div class="span12">
+EOT;
+}
 
 if ($t->isAdmin) {
 	echo '<form class="form-inline" method="post" action="admin.php">';
@@ -66,6 +74,8 @@ EOF;
 		<a href="manageNotices.php?target=announcements" class="btn btn-small" type="submit" name="Action" value="edit-notices">Edit Announcements</a>
 		&nbsp; &nbsp;
 		<a href="manageNotices.php?target=notices" class="btn btn-small" type="submit" name="Action" value="edit-notices">Edit Notices</a>
+		&nbsp; &nbsp;
+		<a href="audit.php" class="btn btn-small" type="submit" name="Action" value="edit-notices">View Audit Details</a>
 		</div>
 LINE;
 	} else {
@@ -112,10 +122,7 @@ foreach ($t->sessions as $s) {
 	echo <<<EOS
 				<div class="heading">
 					<div class="sessioninfo">
-						$s->whenstr - $s->location
-					</div>
-					<div class="status">
-						$s->sessionStatus
+						$s->sessionStatus $s->whenstr - $s->location
 					</div>
 					<div class="sessionops">
 						<form method="post" action="manageSessions.php">

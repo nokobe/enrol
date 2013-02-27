@@ -9,7 +9,7 @@ require "templates/header.php";
  */
 
 echo <<<EOT
-		<h2>Create New Session</h2>
+		<h3>Create New Session</h3>
 		<h4>Enter new values:</h4>
 		<form class="form-horizontal" method="post" action="$t->post" id="sessioncreateform" onsubmit="return checkEntry();">
 EOT;
@@ -28,8 +28,8 @@ echo <<<EOT
 		<br />
 		<br />
 		<!--		<button type="submit" class="btn" name="Action" value="cancel">Cancel</button> -->
-		<button type="submit" class="btn" name="Action" value="cancel" onclick="this.form.button='cancel'">Cancel</button>
-		<button type="submit" class="btn btn-success" name="Action" value="create-session" onclick="this.form.button='create'">Create New Session</button>
+		<button type="submit" class="btn btn-small" name="Action" value="cancel" onclick="this.form.button='cancel'">Cancel</button>
+		<button type="submit" class="btn btn-small btn-success" name="Action" value="create-session" onclick="this.form.button='create'">Create New Session</button>
 		<input type="hidden" name="USID" value="dummy value">
 		</form>
 

@@ -91,7 +91,7 @@ if (SessionMgr::haveMessage()) {
 
 	while (($m = SessionMgr::getMessage()) != "") {
 		echo <<<EOT
-		<div class="alert alert-info">
+		<div class="alert alert-warning">
 		$m
 		<a class="close" data-dismiss="alert" href="#">&times;</a>
 		</div>
