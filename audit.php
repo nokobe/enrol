@@ -48,12 +48,6 @@ if (isset($results)) {
 	}
 }
 
-$fruit = array('apple', 'orange', 'banana');
-$apples = array('royal gala', 'pink lady', 'jonathan', 'golden delicious', 'fuji', 'granny smith');
-
-$headings = array("Food type", "Commonly seen as", "My view");
-$body = array("a", "b", "c");
-
 $page = new SimpleTemplate('templates/audit.html');
 
 # add header essentials
@@ -91,10 +85,6 @@ if (isset($results)) {
 	$page->add('total', count($results));
 }
 
-$page->add('fruit', $fruit);
-$page->add('justapplies', $apples);
-$page->add('table_head', $headings);
-$page->add('table_row', $body);
 print $page->render();
 
 # vim:ts=4:sw=4
